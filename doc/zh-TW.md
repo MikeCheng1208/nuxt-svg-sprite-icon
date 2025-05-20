@@ -1,4 +1,4 @@
-# Nuxt SVG Sprite
+# Nuxt SVG Sprite Icon
 
 [![License][license-src]][license-href]
 [![Nuxt][nuxt-src]][nuxt-href]
