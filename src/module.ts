@@ -67,7 +67,10 @@ export const options = ${JSON.stringify(options, null, 2)}`
       
       watcher.on('all', async (event, path) => {
         console.log(`SVG ${event}: ${path}`)
-        await spriteMapTemplate.write?.()
+        // 修正：重新生成 SVG sprites 並觸發模板更新
+        await generateSprites(inputPath, outputPath, options)
+        // 觸發 Nuxt 的模板重新生成鉤子
+        nuxt.hooks.callHook('builder:generateApp')
       })
       
       nuxt.hook('close', () => {
