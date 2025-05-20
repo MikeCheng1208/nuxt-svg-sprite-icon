@@ -1,9 +1,30 @@
 # Nuxt SVG Sprite Icon
 
-[![License][license-src]][license-href]
-[![Nuxt][nuxt-src]][nuxt-href]
+<p align=center>
+    <a target="_blank" href="https://vuejs.org/" title="vue">
+    <a target="_blank" href="http://nodejs.org/download/" title="Nuxt version">
+        <img src="https://img.shields.io/badge/Nuxt-%3E%3D%203.0.0-brightgreen.svg">
+    </a>
+        <img src="https://img.shields.io/badge/Vue-%3E%203.0.0-brightgreen.svg">
+    </a>
+    <a target="_blank" href="http://nodejs.org/download/" title="Node version">
+        <img src="https://img.shields.io/badge/Node-%3E%3D%2020.0.0-brightgreen.svg">
+    </a>
+    <a target="_blank" href="https://github.com/MikeCheng1208/vue-metamask/pulls" title="PRs Welcome">
+        <img src="https://img.shields.io/badge/PRs-welcome-blue.svg">
+    </a>
+</p>
 
-一個強大的 Nuxt 3 SVG 精靈圖模組，可自動從您的資源檔案生成 SVG 精靈圖，並提供易於使用的組件來顯示圖示。
+<p align=center>
+一個強大的 Nuxt 3 SVG 模組，可自動從您的資源檔案生成 SVG sprite，並提供易於使用的組件來顯示圖示。
+</p>
+
+<p align="center">
+<a target="_blank" href="https://www.npmjs.com/package/nuxt-svg-sprite-icon">
+  <img src="https://nodei.co/npm/nuxt-svg-sprite-icon.png?downloads=true&downloadRank=true&stars=true" alt="NPM version">
+</a>
+</p>
+
 
 
 ## 功能特色

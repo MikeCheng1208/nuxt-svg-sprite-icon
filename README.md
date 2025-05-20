@@ -1,9 +1,30 @@
 # Nuxt SVG Sprite Icon
 
-[![License][license-src]][license-href]
-[![Nuxt][nuxt-src]][nuxt-href]
 
-A powerful SVG sprite module for Nuxt 3 that automatically generates SVG sprites from your assets and provides an easy-to-use component for displaying icons.
+<p align=center>
+    <a target="_blank" href="https://vuejs.org/" title="vue">
+    <a target="_blank" href="http://nodejs.org/download/" title="Nuxt version">
+        <img src="https://img.shields.io/badge/Nuxt-%3E%3D%203.0.0-brightgreen.svg">
+    </a>
+        <img src="https://img.shields.io/badge/Vue-%3E%203.0.0-brightgreen.svg">
+    </a>
+    <a target="_blank" href="http://nodejs.org/download/" title="Node version">
+        <img src="https://img.shields.io/badge/Node-%3E%3D%2020.0.0-brightgreen.svg">
+    </a>
+    <a target="_blank" href="https://github.com/MikeCheng1208/vue-metamask/pulls" title="PRs Welcome">
+        <img src="https://img.shields.io/badge/PRs-welcome-blue.svg">
+    </a>
+</p>
+
+<p align=center>A powerful SVG sprite module for Nuxt 3 that automatically generates SVG sprites from your assets and provides an easy-to-use component for displaying icons.</p>
+
+<p align="center">
+<a target="_blank" href="https://www.npmjs.com/package/nuxt-svg-sprite-icon">
+  <img src="https://nodei.co/npm/nuxt-svg-sprite-icon.png?downloads=true&downloadRank=true&stars=true" alt="NPM version">
+</a>
+</p>
+
+
 
 
 ## Features
