@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, computed, onMounted } from "vue";
 type Props = {
   name: string;
   sprite?: string;
