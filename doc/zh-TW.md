@@ -40,25 +40,25 @@
 
 ## 快速設置
 
-1. 將 `nuxt-svg-sprite` 依賴項添加到您的專案
+1. 將 `nuxt-svg-sprite-icon` 依賴項添加到您的專案
 
 ```bash
 # 使用 pnpm
-pnpm add -D nuxt-svg-sprite
+pnpm add -D nuxt-svg-sprite-icon
 
 # 使用 yarn
-yarn add --dev nuxt-svg-sprite
+yarn add --dev nuxt-svg-sprite-icon
 
 # 使用 npm
-npm install --save-dev nuxt-svg-sprite
+npm install --save-dev nuxt-svg-sprite-icon
 ```
 
-2. 將 `nuxt-svg-sprite` 添加到 `nuxt.config.ts` 的 `modules` 部分
+2. 將 `nuxt-svg-sprite-icon` 添加到 `nuxt.config.ts` 的 `modules` 部分
 
 ```js
 export default defineNuxtConfig({
   modules: [
-    'nuxt-svg-sprite'
+    'nuxt-svg-sprite-icon'
   ]
 })
 ```
@@ -105,7 +105,7 @@ assets/
 
 ```js
 export default defineNuxtConfig({
-  modules: ['nuxt-svg-sprite'],
+  modules: ['nuxt-svg-sprite-icon'],
   svgSprite: {
     // SVG 檔案的來源目錄
     input: '~/assets/svg',
@@ -331,16 +331,3 @@ npm run release
 ## License
 
 MIT.
-
-<!-- 徽章 -->
-[npm-version-src]: https://img.shields.io/npm/v/nuxt-svg-sprite/latest.svg?style=flat&colorA=18181B&colorB=28CF8D
-[npm-version-href]: https://npmjs.com/package/nuxt-svg-sprite
-
-[npm-downloads-src]: https://img.shields.io/npm/dm/nuxt-svg-sprite.svg?style=flat&colorA=18181B&colorB=28CF8D
-[npm-downloads-href]: https://npmjs.com/package/nuxt-svg-sprite
-
-[license-src]: https://img.shields.io/npm/l/nuxt-svg-sprite.svg?style=flat&colorA=18181B&colorB=28CF8D
-[license-href]: https://npmjs.com/package/nuxt-svg-sprite
-
-[nuxt-src]: https://img.shields.io/badge/Nuxt-18181B?logo=nuxt.js
-[nuxt-href]: https://nuxt.com

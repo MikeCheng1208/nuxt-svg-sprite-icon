@@ -40,25 +40,25 @@
 
 ## Quick Setup
 
-1. Add `nuxt-svg-sprite` dependency to your project
+1. Add `nuxt-svg-sprite-icon` dependency to your project
 
 ```bash
 # Using pnpm
-pnpm add -D nuxt-svg-sprite
+pnpm add -D nuxt-svg-sprite-icon
 
 # Using yarn
-yarn add --dev nuxt-svg-sprite
+yarn add --dev nuxt-svg-sprite-icon
 
 # Using npm
-npm install --save-dev nuxt-svg-sprite
+npm install --save-dev nuxt-svg-sprite-icon
 ```
 
-2. Add `nuxt-svg-sprite` to the `modules` section of `nuxt.config.ts`
+2. Add `nuxt-svg-sprite-icon` to the `modules` section of `nuxt.config.ts`
 
 ```js
 export default defineNuxtConfig({
   modules: [
-    'nuxt-svg-sprite'
+    'nuxt-svg-sprite-icon'
   ]
 })
 ```
@@ -105,7 +105,7 @@ You can configure the module by adding a `svgSprite` section to your `nuxt.confi
 
 ```js
 export default defineNuxtConfig({
-  modules: ['nuxt-svg-sprite'],
+  modules: ['nuxt-svg-sprite-icon'],
   svgSprite: {
     // Source directory for SVG files
     input: '~/assets/svg',
@@ -332,16 +332,3 @@ This usually indicates that the SVG files have incorrect or missing `viewBox` at
 ## License
 
 MIT.
-
-<!-- Badges -->
-[npm-version-src]: https://img.shields.io/npm/v/nuxt-svg-sprite/latest.svg?style=flat&colorA=18181B&colorB=28CF8D
-[npm-version-href]: https://npmjs.com/package/nuxt-svg-sprite
-
-[npm-downloads-src]: https://img.shields.io/npm/dm/nuxt-svg-sprite.svg?style=flat&colorA=18181B&colorB=28CF8D
-[npm-downloads-href]: https://npmjs.com/package/nuxt-svg-sprite
-
-[license-src]: https://img.shields.io/npm/l/nuxt-svg-sprite.svg?style=flat&colorA=18181B&colorB=28CF8D
-[license-href]: https://npmjs.com/package/nuxt-svg-sprite
-
-[nuxt-src]: https://img.shields.io/badge/Nuxt-18181B?logo=nuxt.js
-[nuxt-href]: https://nuxt.com
