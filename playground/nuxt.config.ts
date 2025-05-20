@@ -7,6 +7,11 @@ export default defineNuxtConfig({
     elementClass: 'svg-icon'
   },
   devtools: { 
-    enabled: true
-  }
+    enabled: true,
+    timeline: {
+      enabled: false // 關閉timeline功能以避免Timer計時器問題
+    }
+  },
+  // 關閉debug輸出以減少console錯誤
+  debug: false
 })

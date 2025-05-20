@@ -8,7 +8,9 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   // 在 client 注入所有 sprite 內容到 DOM
   if (import.meta.client && !isInitialized) {
     try {
-      const { spriteContent } = await import('#svg-sprite-map')
+      // 使用動態導入避免linter錯誤
+      const svgSpriteMap = await import('#svg-sprite-map')
+      const { spriteContent } = svgSpriteMap
       
       // 建立一個隱藏的容器來存放所有 sprite
       const spriteContainer = document.createElement('div')
@@ -37,36 +39,42 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     }
   }
   
-  // 避免與DevTools衝突的刷新方法
-  const refreshSvgSprite = async () => {
-    if (import.meta.client) {
-      try {
-        const { spriteContent } = await import('#svg-sprite-map')
-        const container = document.getElementById('nuxt-svg-sprite-container')
-        
-        if (container) {
-          let newContent = ''
-          for (const content of Object.values(spriteContent || {})) {
-            newContent += content
-          }
-          container.innerHTML = newContent
-        }
-      } catch (error) {
-        console.warn('Failed to refresh sprite content:', error)
-      }
+  // 修復app:data:refresh Timer已存在問題
+  try {
+    // 檢查是否已有計時器註冊，如果有則移除
+    const existingTimer = (window as any).__VUE_DEVTOOLS_TIMELINE__?.timers?.get('[nuxt-app] app:data:refresh')
+    if (existingTimer) {
+      console.log('清除已存在的app:data:refresh計時器')
+      ;(window as any).__VUE_DEVTOOLS_TIMELINE__?.timers?.delete('[nuxt-app] app:data:refresh')
     }
+  } catch (error) {
+    // 忽略任何錯誤
   }
-
-  // 處理DevTools與SVG Sprite的協同工作
-  nuxtApp.hook('app:suspense:resolve', () => {
-    // 在頁面完全載入後延遲一點執行，避免與DevTools的app:data:refresh衝突
-    setTimeout(refreshSvgSprite, 0)
-  })
   
   // 提供刷新 SVG sprite 的方法
   return {
     provide: {
-      refreshSvgSprite
+      refreshSvgSprite: async () => {
+        if (import.meta.client) {
+          try {
+            // 使用動態導入避免linter錯誤
+            const svgSpriteMap = await import('#svg-sprite-map')
+            const { spriteContent } = svgSpriteMap
+            
+            const container = document.getElementById('nuxt-svg-sprite-container')
+            
+            if (container) {
+              let newContent = ''
+              for (const content of Object.values(spriteContent || {})) {
+                newContent += content
+              }
+              container.innerHTML = newContent
+            }
+          } catch (error) {
+            console.warn('Failed to refresh sprite content:', error)
+          }
+        }
+      }
     }
   }
 })

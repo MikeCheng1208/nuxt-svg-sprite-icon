@@ -83,14 +83,9 @@ export const options = ${JSON.stringify(options, null, 2)}`
       // 去抖處理SVG文件變更，避免過於頻繁觸發
       const debouncedGenerateSprites = debounce(async (event: string, path: string) => {
         console.log(`SVG ${event}: ${path}`)
-        // 只重新生成sprites，不觸發任何可能導致計時器衝突的鉤子
-        try {
-          await generateSprites(inputPath, outputPath, options)
-          // 不去觸發Nuxt的生命週期鉤子，避免計時器衝突
-          // 用戶可以重新整理頁面，或使用插件提供的refreshSvgSprite方法來手動更新
-        } catch (error) {
-          console.warn('Failed to regenerate sprites:', error)
-        }
+        await generateSprites(inputPath, outputPath, options)
+        // 使用最小化的更新方法
+        nuxt.hooks.callHook('builder:generateApp')
       }, 500);
       
       watcher.on('all', debouncedGenerateSprites)
