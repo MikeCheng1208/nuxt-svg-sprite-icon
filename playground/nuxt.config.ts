@@ -7,18 +7,6 @@ export default defineNuxtConfig({
     elementClass: 'svg-icon'
   },
   devtools: { 
-    enabled: true,
-    timeline: {
-      enabled: false 
-    }
-  },
-  debug: false,
-  typescript: {
-    strict: true,
-    typeCheck: false
-  },
-  nitro: {
-    logLevel: 0,
-    timing: false
+    enabled: true
   }
 })
