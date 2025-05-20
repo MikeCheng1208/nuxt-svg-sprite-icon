@@ -1,6 +1,6 @@
 {
-  "name": "my-module",
-  "version": "1.0.0",
+  "name": "nuxt-svg-sprite-icon",
+  "version": "1.0.1",
   "description": "My new Nuxt module",
   "repository": {
     "type": "git",
