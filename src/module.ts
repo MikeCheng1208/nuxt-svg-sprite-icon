@@ -4,6 +4,19 @@ import { watch } from 'chokidar'
 import type { ModuleOptions } from './types'
 import { generateSprites } from './utils/sprite-generator'
 
+// 添加去抖(debounce)功能，防止短時間內觸發多次
+function debounce(fn: Function, wait: number = 300) {
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+  return function(...args: any[]) {
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      // @ts-ignore
+      fn.apply(this, args);
+      timeout = null;
+    }, wait);
+  };
+}
+
 export default defineNuxtModule<ModuleOptions>({
   meta: {
     name: 'nuxt-svg-sprite',
@@ -67,13 +80,20 @@ export const options = ${JSON.stringify(options, null, 2)}`
         ignoreInitial: true
       })
       
-      watcher.on('all', async (event, path) => {
+      // 去抖處理SVG文件變更，避免過於頻繁觸發
+      const debouncedGenerateSprites = debounce(async (event: string, path: string) => {
         console.log(`SVG ${event}: ${path}`)
-        // 修正：重新生成 SVG sprites 並觸發模板更新
-        await generateSprites(inputPath, outputPath, options)
-        // 觸發 Nuxt 的模板重新生成鉤子
-        nuxt.hooks.callHook('builder:generateApp')
-      })
+        // 只重新生成sprites，不觸發任何可能導致計時器衝突的鉤子
+        try {
+          await generateSprites(inputPath, outputPath, options)
+          // 不去觸發Nuxt的生命週期鉤子，避免計時器衝突
+          // 用戶可以重新整理頁面，或使用插件提供的refreshSvgSprite方法來手動更新
+        } catch (error) {
+          console.warn('Failed to regenerate sprites:', error)
+        }
+      }, 500);
+      
+      watcher.on('all', debouncedGenerateSprites)
       
       nuxt.hook('close', () => {
         watcher.close()
