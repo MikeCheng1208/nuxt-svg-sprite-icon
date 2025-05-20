@@ -6,12 +6,11 @@ export default defineNuxtConfig({
     defaultSprite: 'icons',
     elementClass: 'svg-icon'
   },
-  devtools: { 
+  devtools: {
     enabled: true,
     timeline: {
-      enabled: false // 關閉timeline功能以避免Timer計時器問題
+      enabled: false
     }
   },
-  // 關閉debug輸出以減少console錯誤
   debug: false
 })

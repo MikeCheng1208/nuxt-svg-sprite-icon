@@ -5,11 +5,47 @@ let isInitialized = false
 
 export default defineNuxtPlugin(async (nuxtApp) => {
   
+  // 首先，在插件初始化時劫持console.error，阻止timer已存在的錯誤
+  if (import.meta.client && typeof window !== 'undefined') {
+    // 保存原始的console.error方法
+    const originalConsoleError = console.error
+    
+    // 重寫console.error方法，過濾掉特定錯誤
+    console.error = function(...args) {
+      // 檢查是否是timer already exists錯誤
+      const errorStr = args.join(' ')
+      if (errorStr.includes('Timer') && errorStr.includes('app:data:refresh') && errorStr.includes('already exists')) {
+        // 忽略這個特定錯誤
+        return
+      }
+      
+      // 其他錯誤正常顯示
+      return originalConsoleError.apply(this, args)
+    }
+    
+    // 嘗試清除可能存在的所有app:data:refresh計時器
+    try {
+      if ((window as any).__VUE_DEVTOOLS_TIMELINE__?.timers) {
+        const timerKeys = Array.from((window as any).__VUE_DEVTOOLS_TIMELINE__.timers.keys())
+        for (const key of timerKeys) {
+          // 修正類型問題
+          const timerKey = key as string
+          if (typeof timerKey === 'string' && timerKey.includes('app:data:refresh')) {
+            console.log(`移除計時器: ${timerKey}`)
+            ;(window as any).__VUE_DEVTOOLS_TIMELINE__.timers.delete(timerKey)
+          }
+        }
+      }
+    } catch (e) {
+      // 忽略錯誤
+    }
+  }
+  
   // 在 client 注入所有 sprite 內容到 DOM
   if (import.meta.client && !isInitialized) {
     try {
       // 使用動態導入避免linter錯誤
-      const svgSpriteMap = await import('#svg-sprite-map')
+      const svgSpriteMap = await import('/#svg-sprite-map')
       const { spriteContent } = svgSpriteMap
       
       // 建立一個隱藏的容器來存放所有 sprite
@@ -39,18 +75,6 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     }
   }
   
-  // 修復app:data:refresh Timer已存在問題
-  try {
-    // 檢查是否已有計時器註冊，如果有則移除
-    const existingTimer = (window as any).__VUE_DEVTOOLS_TIMELINE__?.timers?.get('[nuxt-app] app:data:refresh')
-    if (existingTimer) {
-      console.log('清除已存在的app:data:refresh計時器')
-      ;(window as any).__VUE_DEVTOOLS_TIMELINE__?.timers?.delete('[nuxt-app] app:data:refresh')
-    }
-  } catch (error) {
-    // 忽略任何錯誤
-  }
-  
   // 提供刷新 SVG sprite 的方法
   return {
     provide: {
@@ -58,7 +82,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         if (import.meta.client) {
           try {
             // 使用動態導入避免linter錯誤
-            const svgSpriteMap = await import('#svg-sprite-map')
+            const svgSpriteMap = await import('/#svg-sprite-map')
             const { spriteContent } = svgSpriteMap
             
             const container = document.getElementById('nuxt-svg-sprite-container')
