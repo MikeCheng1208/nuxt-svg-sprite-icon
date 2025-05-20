@@ -5,26 +5,11 @@ let cachedSpriteContent: Record<string, string> | null = null;
 // 追踪容器是否已添加到DOM
 let isSpriteContainerAdded = false;
 
-// 添加全局錯誤處理，過濾掉計時器錯誤 - 在插件載入時就執行，確保能攔截所有錯誤
-const originalConsoleError = console.error;
-console.error = function(...args: any[]) {
-  // 檢查錯誤訊息是否包含計時器已存在的錯誤
-  const errorMessage = args[0]?.toString?.() || '';
-  if (errorMessage.includes("Timer '[nuxt-app] app:data:refresh' already exists") || 
-      errorMessage.includes("Timer '[nuxt-app]") && errorMessage.includes("already exists")) {
-    // 完全忽略這些錯誤
-    return;
-  }
-  
-  // 對其他錯誤使用原始的控制台錯誤函數
-  originalConsoleError.apply(console, args);
-};
-
 export default defineNuxtPlugin({
   name: 'svg-sprite-client',
   setup() {
     // 防止在服務器端運行
-    if (process.server) {
+    if (import.meta.server) {
       return;
     }
 

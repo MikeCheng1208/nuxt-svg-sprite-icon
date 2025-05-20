@@ -5,6 +5,7 @@ export type ModuleOptions = {
   elementClass?: string
   optimize?: boolean
   svgoOptions?: any
+  watchFiles?: boolean
 }
 
 export type SpriteMap = {
