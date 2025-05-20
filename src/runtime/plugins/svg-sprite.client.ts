@@ -1,5 +1,7 @@
+import { defineNuxtPlugin } from '#app'
 export default defineNuxtPlugin(async () => {
-  // 在客戶端注入所有 sprite 內容到 DOM
+  
+  // 在 client 注入所有 sprite 內容到 DOM
   if (import.meta.client) {
     try {
       const { spriteContent } = await import('#svg-sprite-map')
