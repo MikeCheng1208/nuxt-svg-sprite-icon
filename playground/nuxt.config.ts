@@ -6,5 +6,7 @@ export default defineNuxtConfig({
     defaultSprite: 'icons',
     elementClass: 'svg-icon'
   },
-  devtools: { enabled: true }
+  devtools: { 
+    enabled: true
+  }
 })

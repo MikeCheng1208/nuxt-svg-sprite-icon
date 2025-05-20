@@ -37,27 +37,36 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     }
   }
   
-  // 提供刷新 SVG sprite 的方法，供 Nuxt DevTools 使用
+  // 避免與DevTools衝突的刷新方法
+  const refreshSvgSprite = async () => {
+    if (import.meta.client) {
+      try {
+        const { spriteContent } = await import('#svg-sprite-map')
+        const container = document.getElementById('nuxt-svg-sprite-container')
+        
+        if (container) {
+          let newContent = ''
+          for (const content of Object.values(spriteContent || {})) {
+            newContent += content
+          }
+          container.innerHTML = newContent
+        }
+      } catch (error) {
+        console.warn('Failed to refresh sprite content:', error)
+      }
+    }
+  }
+
+  // 處理DevTools與SVG Sprite的協同工作
+  nuxtApp.hook('app:suspense:resolve', () => {
+    // 在頁面完全載入後延遲一點執行，避免與DevTools的app:data:refresh衝突
+    setTimeout(refreshSvgSprite, 0)
+  })
+  
+  // 提供刷新 SVG sprite 的方法
   return {
     provide: {
-      refreshSvgSprite: async () => {
-        if (import.meta.client) {
-          try {
-            const { spriteContent } = await import('#svg-sprite-map')
-            const container = document.getElementById('nuxt-svg-sprite-container')
-            
-            if (container) {
-              let newContent = ''
-              for (const content of Object.values(spriteContent || {})) {
-                newContent += content
-              }
-              container.innerHTML = newContent
-            }
-          } catch (error) {
-            console.warn('Failed to refresh sprite content:', error)
-          }
-        }
-      }
+      refreshSvgSprite
     }
   }
 })
