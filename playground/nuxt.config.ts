@@ -4,7 +4,7 @@ export default defineNuxtConfig({
     input: '~/assets/svg',
     output: '~/assets/sprite/gen',
     defaultSprite: 'icons',
-    elementClass: 'icon-sprite'
+    elementClass: 'svg-icon'
   },
   devtools: { enabled: true }
 })

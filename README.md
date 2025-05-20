@@ -117,7 +117,7 @@ export default defineNuxtConfig({
     defaultSprite: 'icons',
     
     // Global CSS class for all svg-icon instances
-    elementClass: 'icon',
+    elementClass: 'svg-icon',
     
     // Whether to optimize SVG files (requires svgo)
     optimize: false
@@ -132,7 +132,7 @@ export default defineNuxtConfig({
 | `input` | `string` | `'~/assets/svg'` | Directory containing original SVG files |
 | `output` | `string` | `'~/assets/sprite/gen'` | Directory for generated sprite files |
 | `defaultSprite` | `string` | `'icons'` | Name of default sprite (for SVGs in root input directory) |
-| `elementClass` | `string` | `'icon'` | Global CSS class applied to all `<SvgIcon>` elements |
+| `elementClass` | `string` | `'svg-icon'` | Global CSS class applied to all `<SvgIcon>` elements |
 | `optimize` | `boolean` | `false` | Enable SVG optimization using SVGO |
 
 ## Component API
@@ -145,7 +145,7 @@ The `<SvgIcon>` component is automatically registered and available globally.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `name` | `string` | - | **Required.** Name of the icon (supports nested paths like `user/profile`) |
+| `name` | `string` | - | **Required.** Name of the icon (supports nested paths like `user/example`) |
 
 
 #### Usage Examples

@@ -33,7 +33,7 @@ const symbolName = computed(() => {
 
 //
 const svgClass = computed(() => {
-  if (!spriteData.value) return "icon-sprite";
+  if (!spriteData.value) return "svg-icon";
   return spriteData.value.options.elementClass;
 });
 
@@ -48,7 +48,7 @@ onMounted(async () => {
     spriteData.value = {
       spriteMap: {},
       spriteContent: {},
-      options: { defaultSprite: "icons", elementClass: "icon-sprite" },
+      options: { defaultSprite: "icons", elementClass: "svg-icon" },
     };
   }
 });
