@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, defineComponent } from "vue";
 type Props = {
   name: string;
   sprite?: string;
@@ -8,6 +8,9 @@ type Props = {
 const props = withDefaults(defineProps<Props>(), {
   sprite: undefined,
 });
+
+// 添加此行，幫助 Nuxt DevTools 找到元件源代碼位置
+const __file = "src/runtime/components/SvgIcon.vue";
 
 const spriteData = ref<any>(null);
 
