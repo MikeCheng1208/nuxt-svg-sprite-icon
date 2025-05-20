@@ -40,6 +40,13 @@ export default defineNuxtModule<ModuleOptions>({
       mode: 'client'
     })
     
+    // 直接緩解 Nuxt DevTools 的計時器問題
+    if (nuxt.options.devtools?.enabled) {
+      // 暫時禁用 Nuxt DevTools 的自動刷新功能
+      // @ts-ignore - 直接設置 Nuxt 內部屬性
+      nuxt.options._disableDevtoolsDataRefresh = true;
+    }
+    
     // 生成 sprite 映射模板
     const spriteMapTemplate = addTemplate({
       filename: 'svg-sprite-map.mjs',

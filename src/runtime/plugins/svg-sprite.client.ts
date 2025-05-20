@@ -1,106 +1,111 @@
 import { defineNuxtPlugin } from '#app'
 
-// 保存已加載的sprite內容
-let cachedSpriteContent: Record<string, string> | null = null;
-// 追踪容器是否已添加到DOM
-let isSpriteContainerAdded = false;
+// 保存全局組件的 State
+const state = {
+  spriteContent: null as Record<string, string> | null,
+  isSpriteContainerAdded: false
+};
+
+// 為了緩解 "Timer '[nuxt-app] app:data:refresh' already exists" 錯誤
+// 我們需要攔截特定的錯誤消息
+const originalConsoleError = console.error;
+console.error = function(...args: any[]) {
+  const errorMessage = args[0]?.toString?.() || '';
+  if (errorMessage.includes("Timer '[nuxt-app] app:data:refresh' already exists")) {
+    // 忽略這個特定的計時器錯誤
+    return;
+  }
+  originalConsoleError.apply(console, args);
+};
 
 export default defineNuxtPlugin({
-  name: 'svg-sprite-client',
-  setup() {
+  name: 'svg-sprite-icon-client',
+  setup(nuxtApp) {
     // 防止在服務器端運行
-    if (import.meta.server) {
-      return;
+    if (process.server) {
+      return {};
     }
 
     // 載入並初始化SVG sprites的函數
     const loadSpriteContent = async () => {
-      if (cachedSpriteContent) return cachedSpriteContent;
+      if (state.spriteContent) return state.spriteContent;
       
       try {
-        // @ts-ignore
+        // @ts-ignore - Nuxt 運行時處理
         const svgSpriteMap = await import('#svg-sprite-map');
-        const spriteContent = svgSpriteMap.spriteContent || {};
         
-        // 緩存sprite內容
-        cachedSpriteContent = spriteContent;
-        return cachedSpriteContent;
+        if (svgSpriteMap && typeof svgSpriteMap.spriteContent === 'object') {
+          state.spriteContent = svgSpriteMap.spriteContent || {};
+          return state.spriteContent;
+        }
+        return {};
       } catch (error) {
-        console.warn('Failed to load SVG sprite content:', error);
+        console.warn('[svg-sprite] 無法載入 sprite 內容');
         return {};
       }
     };
 
     // 添加SVG sprite容器到DOM
     const addSpriteContainer = async () => {
-      if (isSpriteContainerAdded || !document.body) return;
+      // 多重檢查以避免重複添加
+      if (state.isSpriteContainerAdded || !document || !document.body) return;
       
       const spriteContent = await loadSpriteContent();
       if (!spriteContent || Object.keys(spriteContent).length === 0) {
         return;
       }
       
-      // 檢查是否已經存在此容器，避免重複注入
-      const existingContainer = document.getElementById('nuxt-svg-sprite-container');
-      if (existingContainer) {
-        existingContainer.remove();
-      }
-      
-      // 建立一個隱藏的容器來存放所有 sprite
-      const spriteContainer = document.createElement('div');
-      spriteContainer.id = 'nuxt-svg-sprite-container';
-      spriteContainer.style.display = 'none';
-      spriteContainer.setAttribute('aria-hidden', 'true');
-      
-      // 將所有 sprite 內容加入到容器中
-      for (const content of Object.values(spriteContent)) {
-        spriteContainer.innerHTML += content;
-      }
-      
-      // 將容器加入到 body 的開頭
-      if (spriteContainer.innerHTML) {
-        document.body.insertBefore(spriteContainer, document.body.firstChild);
-        isSpriteContainerAdded = true;
-      }
-    };
-
-    // 使用MutationObserver確保在DOM可用時加載SVG sprite
-    const setupSvgSprite = () => {
-      // 如果body已存在，直接添加sprite容器
-      if (document.body) {
-        addSpriteContainer();
-        return;
-      }
-
-      // 否則使用MutationObserver監聽DOM變化
-      const observer = new MutationObserver((mutations) => {
-        for (const mutation of mutations) {
-          if (mutation.type === 'childList' && document.body) {
-            addSpriteContainer();
-            observer.disconnect(); // 一旦添加了容器，就停止觀察
-            break;
+      try {
+        // 檢查是否已經存在此容器
+        const existingContainer = document.getElementById('nuxt-svg-sprite-container');
+        if (existingContainer) {
+          existingContainer.remove();
+        }
+        
+        // 建立容器
+        const spriteContainer = document.createElement('div');
+        spriteContainer.id = 'nuxt-svg-sprite-container';
+        spriteContainer.style.display = 'none';
+        spriteContainer.setAttribute('aria-hidden', 'true');
+        
+        // 將所有 sprite 內容加入到容器中
+        for (const content of Object.values(spriteContent)) {
+          if (content) {
+            spriteContainer.innerHTML += content;
           }
         }
-      });
-      
-      // 觀察document的變化
-      observer.observe(document.documentElement, { 
-        childList: true, 
-        subtree: true 
-      });
-      
-      // 安全起見，設置一個超時，確保即使MutationObserver沒有觸發也能嘗試添加sprite
-      setTimeout(() => {
-        if (!isSpriteContainerAdded && document.body) {
-          addSpriteContainer();
-          observer.disconnect();
+        
+        // 有內容才添加
+        if (spriteContainer.innerHTML) {
+          document.body.insertBefore(spriteContainer, document.body.firstChild);
+          state.isSpriteContainerAdded = true;
         }
-      }, 2000);
+      } catch (error) {
+        console.warn('[svg-sprite] 添加 SVG sprite 容器失敗');
+      }
     };
 
-    // 初始化SVG sprite
-    setupSvgSprite();
+    // 初始化 SVG sprite
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      // 文檔已加載完成，立即添加
+      addSpriteContainer();
+    } else {
+      // 等待 DOM 完全加載
+      document.addEventListener('DOMContentLoaded', () => {
+        addSpriteContainer();
+      });
+    }
 
-    return {};
+    // 提供重新加載方法
+    return {
+      provide: {
+        svgSprite: {
+          reload: async () => {
+            state.isSpriteContainerAdded = false;
+            await addSpriteContainer();
+          }
+        }
+      }
+    };
   }
 })
