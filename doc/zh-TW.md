@@ -5,7 +5,6 @@
 
 一個強大的 Nuxt 3 SVG 精靈圖模組，可自動從您的資源檔案生成 SVG 精靈圖，並提供易於使用的組件來顯示圖示。
 
-[📖 &nbsp;閱讀更多](https://github.com/your-username/nuxt-svg-sprite)
 
 ## 功能特色
 

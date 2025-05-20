@@ -5,7 +5,6 @@
 
 A powerful SVG sprite module for Nuxt 3 that automatically generates SVG sprites from your assets and provides an easy-to-use component for displaying icons.
 
-[📖 &nbsp;Read more](https://github.com/your-username/nuxt-svg-sprite)
 
 ## Features
 
