@@ -83,6 +83,7 @@ export const options = ${JSON.stringify(options, null, 2)}`
         console.warn('Failed to generate sprites during build:', error)
       }
     })
+    
   }
 })
 

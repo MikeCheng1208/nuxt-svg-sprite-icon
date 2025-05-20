@@ -1,18 +1,27 @@
 {
   "name": "my-module",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "description": "My new Nuxt module",
-  "repository": "your-org/my-module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MikeCheng1208/nuxt-svg-sprite-icon.git"
+  },
   "license": "MIT",
   "type": "module",
+  "author": "mike cheng <https://github.com/MikeCheng1208/> (https://github.com/MikeCheng1208/)",
+  "bugs": {
+    "url": "https://github.com/MikeCheng1208/nuxt-svg-sprite-icon/issues"
+  },
+  "homepage": "https://github.com/MikeCheng1208/nuxt-svg-sprite-icon",
   "exports": {
     ".": {
-      "types": "./dist/types.d.ts",
+      "types": "./dist/types.d.mts",
       "import": "./dist/module.mjs",
       "require": "./dist/module.cjs"
     }
   },
   "main": "./dist/module.mjs",
+  "types": "./dist/types.d.mts",
   "typesVersions": {
     "*": {
       ".": [
@@ -49,6 +58,17 @@
     "nuxt": "^3.17.3",
     "typescript": "~5.8.3",
     "vitest": "^3.1.4",
-    "vue-tsc": "^2.2.10"
-  }
+    "vue-tsc": "^2.2.10",
+    "chokidar": "^3.5.0"
+  },
+  "keywords": [
+    "icon",
+    "Vue",
+    "Vue3",
+    "svg",
+    "Nuxt",
+    "Nuxt3",
+    "svg-sprite",
+    "nuxt-svg-sprite"
+  ]
 }
