@@ -33,7 +33,7 @@ export default defineNuxtModule<ModuleOptions>({
     })
     
     // 添加插件
-    addPlugin(resolve('./runtime/plugins/svg-sprite.client.ts'))
+    addPlugin(resolve('./runtime/plugins/svg-sprite.client'))
     
     
     // 生成 sprite 映射模板 - 修正這裡
