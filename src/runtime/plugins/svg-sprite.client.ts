@@ -6,18 +6,6 @@ const state = {
   isSpriteContainerAdded: false
 };
 
-// 為了緩解 "Timer '[nuxt-app] app:data:refresh' already exists" 錯誤
-// 我們需要攔截特定的錯誤消息
-const originalConsoleError = console.error;
-console.error = function(...args: any[]) {
-  const errorMessage = args[0]?.toString?.() || '';
-  if (errorMessage.includes("Timer '[nuxt-app] app:data:refresh' already exists")) {
-    // 忽略這個特定的計時器錯誤
-    return;
-  }
-  originalConsoleError.apply(console, args);
-};
-
 export default defineNuxtPlugin({
   name: 'svg-sprite-icon-client',
   setup(nuxtApp) {
@@ -30,19 +18,14 @@ export default defineNuxtPlugin({
     const loadSpriteContent = async () => {
       if (state.spriteContent) return state.spriteContent;
       
-      try {
-        // @ts-ignore - Nuxt 運行時處理
-        const svgSpriteMap = await import('#svg-sprite-map');
-        
-        if (svgSpriteMap && typeof svgSpriteMap.spriteContent === 'object') {
-          state.spriteContent = svgSpriteMap.spriteContent || {};
-          return state.spriteContent;
-        }
-        return {};
-      } catch (error) {
-        console.warn('[svg-sprite] 無法載入 sprite 內容');
-        return {};
+      // @ts-ignore - Nuxt 運行時處理
+      const svgSpriteMap = await import('#svg-sprite-map');
+      
+      if (svgSpriteMap && typeof svgSpriteMap.spriteContent === 'object') {
+        state.spriteContent = svgSpriteMap.spriteContent || {};
+        return state.spriteContent;
       }
+      return {};
     };
 
     // 添加SVG sprite容器到DOM
@@ -55,33 +38,29 @@ export default defineNuxtPlugin({
         return;
       }
       
-      try {
-        // 檢查是否已經存在此容器
-        const existingContainer = document.getElementById('nuxt-svg-sprite-container');
-        if (existingContainer) {
-          existingContainer.remove();
+      // 檢查是否已經存在此容器
+      const existingContainer = document.getElementById('nuxt-svg-sprite-container');
+      if (existingContainer) {
+        existingContainer.remove();
+      }
+      
+      // 建立容器
+      const spriteContainer = document.createElement('div');
+      spriteContainer.id = 'nuxt-svg-sprite-container';
+      spriteContainer.style.display = 'none';
+      spriteContainer.setAttribute('aria-hidden', 'true');
+      
+      // 將所有 sprite 內容加入到容器中
+      for (const content of Object.values(spriteContent)) {
+        if (content) {
+          spriteContainer.innerHTML += content;
         }
-        
-        // 建立容器
-        const spriteContainer = document.createElement('div');
-        spriteContainer.id = 'nuxt-svg-sprite-container';
-        spriteContainer.style.display = 'none';
-        spriteContainer.setAttribute('aria-hidden', 'true');
-        
-        // 將所有 sprite 內容加入到容器中
-        for (const content of Object.values(spriteContent)) {
-          if (content) {
-            spriteContainer.innerHTML += content;
-          }
-        }
-        
-        // 有內容才添加
-        if (spriteContainer.innerHTML) {
-          document.body.insertBefore(spriteContainer, document.body.firstChild);
-          state.isSpriteContainerAdded = true;
-        }
-      } catch (error) {
-        console.warn('[svg-sprite] 添加 SVG sprite 容器失敗');
+      }
+      
+      // 有內容才添加
+      if (spriteContainer.innerHTML) {
+        document.body.insertBefore(spriteContainer, document.body.firstChild);
+        state.isSpriteContainerAdded = true;
       }
     };
 

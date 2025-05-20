@@ -45,11 +45,11 @@ const svgClass = computed(() => {
 const href = computed(() => `#${symbolName.value}`);
 
 onMounted(async () => {
-  try {
-    // @ts-ignore - Nuxt 將在運行時解析模組
-    spriteData.value = await import("#svg-sprite-map");
-  } catch (error) {
-    console.warn("Failed to load sprite map:", error);
+  // @ts-ignore - Nuxt 將在運行時解析模組
+  spriteData.value = await import("#svg-sprite-map");
+
+  // 如果載入失敗提供預設值
+  if (!spriteData.value) {
     spriteData.value = {
       spriteMap: {},
       spriteContent: {},
