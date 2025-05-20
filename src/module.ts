@@ -29,7 +29,7 @@ export default defineNuxtModule<ModuleOptions>({
     input: '~/assets/svg',
     output: '~/assets/sprite/gen',
     defaultSprite: 'icons',
-    elementClass: 'icon',
+    elementClass: 'svg-icon',
     optimize: false
   },
   async setup(options, nuxt) {
@@ -47,7 +47,7 @@ export default defineNuxtModule<ModuleOptions>({
       chunkName: 'components/svg-icon'
     })
     
-    // 添加SVG Sprite插件，不使用enforce參數
+    // 添加SVG Sprite插件
     addPlugin({
       src: resolve('./runtime/plugins/svg-sprite.client'),
       mode: 'client'
@@ -74,57 +74,59 @@ export const options = ${JSON.stringify(options, null, 2)}`
     })
     
     // 註冊虛擬模組
+    // @ts-ignore
     nuxt.options.alias['#svg-sprite-map'] = spriteMapTemplate.dst
     
     // 開發模式下監控檔案變化
     if (nuxt.options.dev) {
-      // 使用獨立的watcher實例，完全脫離Nuxt的生命週期
-      let watcher: any = null
+      // 防止過多HMR觸發的狀態管理
+      let isProcessingSvg = false;
+      let svgWatcher: ReturnType<typeof watch> | null = null;
       
-      // 避免在Nuxt初始化時立即創建watcher
+      // 延遲初始化watcher，避免與Nuxt初始化階段衝突
       setTimeout(() => {
-        watcher = watch(join(inputPath, '**/*.svg'), {
-          ignoreInitial: true
-        })
-        
-        // 使用自定義的事件處理機制，完全避免與Nuxt DevTools衝突
-        let isGenerating = false;
-        
-        // 去抖處理SVG文件變更，避免過於頻繁觸發
-        const handleFileChange = async (event: string, path: string) => {
-          if (isGenerating) return;
+        // 使用更大的debounce時間減少觸發頻率
+        const debouncedRegenerate = debounce(async () => {
+          if (isProcessingSvg) return;
           
-          console.log(`SVG ${event}: ${path}`);
-          isGenerating = true;
+          isProcessingSvg = true;
           
           try {
-            // 只重新生成Sprites文件，不調用nuxt hooks或計時器
             await generateSprites(inputPath, outputPath, options);
-            
-            // 給系統一些時間處理文件變更
-            setTimeout(() => {
-              isGenerating = false;
-            }, 300);
           } catch (error) {
-            console.warn('Failed to regenerate sprites:', error);
-            isGenerating = false;
+            console.warn('重新生成SVG Sprites失敗:', error);
+          } finally {
+            // 延遲重置標誌，減少連續觸發
+            setTimeout(() => {
+              isProcessingSvg = false;
+            }, 500);
           }
-        };
+        }, 1000); // 增加debounce時間到1秒
         
-        const debouncedHandler = debounce(handleFileChange, 500);
+        // 初始化文件監控，添加寫入完成等待
+        svgWatcher = watch(join(inputPath, '**/*.svg'), {
+          ignoreInitial: true,
+          awaitWriteFinish: {
+            stabilityThreshold: 300,
+            pollInterval: 100
+          }
+        });
         
-        watcher.on('all', (event: string, path: string) => {
-          debouncedHandler(event, path);
+        // 處理文件變更事件
+        svgWatcher.on('all', () => {
+          debouncedRegenerate();
         });
         
         // 確保在Nuxt關閉時清理watcher
         nuxt.hook('close', () => {
-          if (watcher) watcher.close();
+          if (svgWatcher) {
+            svgWatcher.close();
+          }
         });
-      }, 1000); // 延遲1秒創建watcher，避免與Nuxt初始化衝突
+      }, 2000); // 延遲2秒創建watcher
     }
     
-    // 建構時生成 sprites - 使用一次性操作，避免註冊計時器
+    // 建構時生成 sprites
     nuxt.hook('build:before', async () => {
       try {
         await generateSprites(inputPath, outputPath, options)
@@ -132,7 +134,6 @@ export const options = ${JSON.stringify(options, null, 2)}`
         console.warn('Failed to generate sprites during build:', error)
       }
     })
-    
   }
 })
 

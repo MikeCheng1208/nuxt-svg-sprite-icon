@@ -5,47 +5,40 @@ let cachedSpriteContent: Record<string, string> | null = null;
 // 追踪容器是否已添加到DOM
 let isSpriteContainerAdded = false;
 
-// 添加全局錯誤處理，過濾掉計時器錯誤
-const setupErrorFilter = () => {
-  // 保存原始的控制台錯誤函數
-  const originalConsoleError = console.error;
+// 添加全局錯誤處理，過濾掉計時器錯誤 - 在插件載入時就執行，確保能攔截所有錯誤
+const originalConsoleError = console.error;
+console.error = function(...args: any[]) {
+  // 檢查錯誤訊息是否包含計時器已存在的錯誤
+  const errorMessage = args[0]?.toString?.() || '';
+  if (errorMessage.includes("Timer '[nuxt-app] app:data:refresh' already exists") || 
+      errorMessage.includes("Timer '[nuxt-app]") && errorMessage.includes("already exists")) {
+    // 完全忽略這些錯誤
+    return;
+  }
   
-  // 替換為過濾版本
-  console.error = function(...args: any[]) {
-    // 檢查錯誤訊息是否包含計時器已存在的錯誤
-    const errorMessage = args[0]?.toString?.() || '';
-    if (errorMessage.includes("Timer '[nuxt-app] app:data:refresh' already exists")) {
-      // 忽略這個錯誤
-      return;
-    }
-    
-    // 對其他錯誤使用原始的控制台錯誤函數
-    originalConsoleError.apply(console, args);
-  };
+  // 對其他錯誤使用原始的控制台錯誤函數
+  originalConsoleError.apply(console, args);
 };
 
 export default defineNuxtPlugin({
   name: 'svg-sprite-client',
-  enforce: 'post', // 確保在其他插件之後運行，包括DevTools插件
   setup() {
     // 防止在服務器端運行
     if (process.server) {
       return;
     }
-    
-    // 設置錯誤過濾器
-    setupErrorFilter();
 
     // 載入並初始化SVG sprites的函數
     const loadSpriteContent = async () => {
       if (cachedSpriteContent) return cachedSpriteContent;
       
       try {
+        // @ts-ignore
         const svgSpriteMap = await import('#svg-sprite-map');
-        const { spriteContent } = svgSpriteMap;
+        const spriteContent = svgSpriteMap.spriteContent || {};
         
         // 緩存sprite內容
-        cachedSpriteContent = spriteContent || {};
+        cachedSpriteContent = spriteContent;
         return cachedSpriteContent;
       } catch (error) {
         console.warn('Failed to load SVG sprite content:', error);
@@ -62,6 +55,12 @@ export default defineNuxtPlugin({
         return;
       }
       
+      // 檢查是否已經存在此容器，避免重複注入
+      const existingContainer = document.getElementById('nuxt-svg-sprite-container');
+      if (existingContainer) {
+        existingContainer.remove();
+      }
+      
       // 建立一個隱藏的容器來存放所有 sprite
       const spriteContainer = document.createElement('div');
       spriteContainer.id = 'nuxt-svg-sprite-container';
@@ -73,12 +72,6 @@ export default defineNuxtPlugin({
         spriteContainer.innerHTML += content;
       }
       
-      // 檢查是否已經存在此容器，避免重複注入
-      const existingContainer = document.getElementById('nuxt-svg-sprite-container');
-      if (existingContainer) {
-        existingContainer.remove();
-      }
-      
       // 將容器加入到 body 的開頭
       if (spriteContainer.innerHTML) {
         document.body.insertBefore(spriteContainer, document.body.firstChild);
@@ -87,7 +80,6 @@ export default defineNuxtPlugin({
     };
 
     // 使用MutationObserver確保在DOM可用時加載SVG sprite
-    // 這種方法完全避開了Nuxt的計時器和生命週期
     const setupSvgSprite = () => {
       // 如果body已存在，直接添加sprite容器
       if (document.body) {
