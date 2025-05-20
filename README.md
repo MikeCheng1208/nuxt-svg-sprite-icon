@@ -312,7 +312,7 @@ This usually indicates that the SVG files have incorrect or missing `viewBox` at
 
 ## License
 
-[MIT License](./LICENSE)
+MIT.
 
 <!-- Badges -->
 [npm-version-src]: https://img.shields.io/npm/v/nuxt-svg-sprite/latest.svg?style=flat&colorA=18181B&colorB=28CF8D

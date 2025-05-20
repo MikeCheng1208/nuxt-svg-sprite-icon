@@ -309,9 +309,9 @@ npm run release
 - 純 CSS 方法意味著樣式不需要 JavaScript
 
 
-## 授權條款
+## License
 
-[MIT 授權條款](./LICENSE)
+MIT.
 
 <!-- 徽章 -->
 [npm-version-src]: https://img.shields.io/npm/v/nuxt-svg-sprite/latest.svg?style=flat&colorA=18181B&colorB=28CF8D
