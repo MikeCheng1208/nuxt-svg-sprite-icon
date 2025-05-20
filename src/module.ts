@@ -47,12 +47,13 @@ export default defineNuxtModule<ModuleOptions>({
       chunkName: 'components/svg-icon'
     })
     
-    // 刪除錯誤攔截器插件，改用根本解決方案
-    // 添加SVG Sprite插件
-    addPlugin(resolve('./runtime/plugins/svg-sprite.client'))
+    // 添加SVG Sprite插件，不使用enforce參數
+    addPlugin({
+      src: resolve('./runtime/plugins/svg-sprite.client'),
+      mode: 'client'
+    })
     
-    
-    // 生成 sprite 映射模板 - 修正這裡
+    // 生成 sprite 映射模板
     const spriteMapTemplate = addTemplate({
       filename: 'svg-sprite-map.mjs',
       write: true,
@@ -77,47 +78,53 @@ export const options = ${JSON.stringify(options, null, 2)}`
     
     // 開發模式下監控檔案變化
     if (nuxt.options.dev) {
-      // 使用唯一的watcher實例，而非鉤子
-      const watcher = watch(join(inputPath, '**/*.svg'), {
-        ignoreInitial: true
-      })
+      // 使用獨立的watcher實例，完全脫離Nuxt的生命週期
+      let watcher: any = null
       
-      // 使用自定義的事件處理機制，避免與Nuxt DevTools衝突
-      let isGenerating = false;
-      
-      // 去抖處理SVG文件變更，避免過於頻繁觸發
-      const handleFileChange = async (event: string, path: string) => {
-        if (isGenerating) return;
+      // 避免在Nuxt初始化時立即創建watcher
+      setTimeout(() => {
+        watcher = watch(join(inputPath, '**/*.svg'), {
+          ignoreInitial: true
+        })
         
-        console.log(`SVG ${event}: ${path}`);
-        isGenerating = true;
+        // 使用自定義的事件處理機制，完全避免與Nuxt DevTools衝突
+        let isGenerating = false;
         
-        try {
-          // 只重新生成Sprites文件，不再調用nuxt hooks
-          await generateSprites(inputPath, outputPath, options);
+        // 去抖處理SVG文件變更，避免過於頻繁觸發
+        const handleFileChange = async (event: string, path: string) => {
+          if (isGenerating) return;
           
-          // 等待下一個事件循環再更新模板
-          setTimeout(() => {
+          console.log(`SVG ${event}: ${path}`);
+          isGenerating = true;
+          
+          try {
+            // 只重新生成Sprites文件，不調用nuxt hooks或計時器
+            await generateSprites(inputPath, outputPath, options);
+            
+            // 給系統一些時間處理文件變更
+            setTimeout(() => {
+              isGenerating = false;
+            }, 300);
+          } catch (error) {
+            console.warn('Failed to regenerate sprites:', error);
             isGenerating = false;
-          }, 100);
-        } catch (error) {
-          console.warn('Failed to regenerate sprites:', error);
-          isGenerating = false;
-        }
-      };
-      
-      const debouncedHandler = debounce(handleFileChange, 500);
-      
-      watcher.on('all', (event, path) => {
-        debouncedHandler(event, path);
-      });
-      
-      nuxt.hook('close', () => {
-        watcher.close();
-      });
+          }
+        };
+        
+        const debouncedHandler = debounce(handleFileChange, 500);
+        
+        watcher.on('all', (event: string, path: string) => {
+          debouncedHandler(event, path);
+        });
+        
+        // 確保在Nuxt關閉時清理watcher
+        nuxt.hook('close', () => {
+          if (watcher) watcher.close();
+        });
+      }, 1000); // 延遲1秒創建watcher，避免與Nuxt初始化衝突
     }
     
-    // 建構時生成 sprites
+    // 建構時生成 sprites - 使用一次性操作，避免註冊計時器
     nuxt.hook('build:before', async () => {
       try {
         await generateSprites(inputPath, outputPath, options)
