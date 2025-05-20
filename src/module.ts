@@ -40,7 +40,7 @@ export default defineNuxtModule<ModuleOptions>({
       mode: 'client'
     })
     
-    // 生成 sprite 映射模板
+    // 使用 addTemplate 生成 sprite 映射模板
     const spriteMapTemplate = addTemplate({
       filename: 'svg-sprite-map.mjs',
       write: true,
@@ -53,9 +53,16 @@ export const options = ${JSON.stringify(options, null, 2)}`
       }
     })
     
-    // 註冊虛擬模組
-    // @ts-ignore
-    nuxt.options.alias['#svg-sprite-map'] = spriteMapTemplate.dst
+    // 註冊虛擬模組 - 使用 nitro:config 鉤子而非直接修改 alias
+    nuxt.hook('nitro:config', (nitroConfig) => {
+      nitroConfig.virtual = nitroConfig.virtual || {}
+      nitroConfig.virtual['#svg-sprite-map'] = `${spriteMapTemplate.dst}`
+    })
+    
+    // 在初始化時確保 sprites 被生成
+    nuxt.hooks.hook('ready', async () => {
+      await generateSprites(inputPath, outputPath, options)
+    })
     
     // 為檔案添加到 nuxt.options.watch 中，讓 Nuxt 內建的 HMR 機制處理
     if (nuxt.options.dev && options.watchFiles) {
@@ -66,17 +73,16 @@ export const options = ${JSON.stringify(options, null, 2)}`
       }
       nuxt.options.watch.push(svgPattern);
       
-      // 註冊 builder:watch 事件處理
+      // 監控文件變化
       nuxt.hook('builder:watch', (event, path) => {
         if (path.endsWith('.svg') && path.includes(inputPath)) {
-          // 當 SVG 檔案變化時只重新生成 sprites，不觸發完整重新建構
-          setTimeout(async () => {
-            await generateSprites(inputPath, outputPath, options);
+          // 當 SVG 文件變化時，直接重新生成
+          void generateSprites(inputPath, outputPath, options).then(() => {
             // 通知有更新但不觸發完整重新構建
-            nuxt.callHook('builder:generateApp');
-          }, 100); // 小延遲避免連續觸發
+            nuxt.callHook('builder:generateApp')
+          })
         }
-      });
+      })
     }
     
     // 建構時生成 sprites

@@ -8,7 +8,7 @@ const state = {
 
 export default defineNuxtPlugin({
   name: 'svg-sprite-icon-client',
-  setup(nuxtApp) {
+  setup() {
     // 防止在服務器端運行
     if (process.server) {
       return {};
@@ -75,16 +75,6 @@ export default defineNuxtPlugin({
       });
     }
 
-    // 提供重新加載方法
-    return {
-      provide: {
-        svgSprite: {
-          reload: async () => {
-            state.isSpriteContainerAdded = false;
-            await addSpriteContainer();
-          }
-        }
-      }
-    };
+    return {};
   }
 })
