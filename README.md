@@ -11,7 +11,7 @@
     <a target="_blank" href="http://nodejs.org/download/" title="Node version">
         <img src="https://img.shields.io/badge/Node-%3E%3D%2020.0.0-brightgreen.svg">
     </a>
-    <a target="_blank" href="https://github.com/MikeCheng1208/vue-metamask/pulls" title="PRs Welcome">
+    <a target="_blank" href="https://github.com/MikeCheng1208/nuxt-svg-sprite-icon/pulls" title="PRs Welcome">
         <img src="https://img.shields.io/badge/PRs-welcome-blue.svg">
     </a>
 </p>
