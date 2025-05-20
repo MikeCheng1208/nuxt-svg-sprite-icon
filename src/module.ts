@@ -3,6 +3,22 @@ import { join } from 'path'
 import type { ModuleOptions } from './types'
 import { generateSprites } from './utils/sprite-generator'
 
+// 安全地將物件轉換為 JSON 字串，特別處理正則表達式問題
+function safeStringify(obj: any): string {
+  // 移除或轉義可能導致正則表達式錯誤的內容
+  return JSON.stringify(obj, (key, value) => {
+    // 處理特殊字符，尤其是正則表達式中常見的問題字符
+    if (typeof value === 'string') {
+      // 轉義可能在正則表達式中產生問題的反斜線、斜線和特殊控制字符
+      return value
+        .replace(/\\/g, '\\\\')  // 雙重轉義反斜線
+        .replace(/\u2028/g, '\\u2028')  // 處理行分隔符
+        .replace(/\u2029/g, '\\u2029'); // 處理段落分隔符
+    }
+    return value;
+  }, 2);
+}
+
 export default defineNuxtModule<ModuleOptions>({
   meta: {
     name: 'nuxt-svg-sprite',
@@ -47,9 +63,10 @@ export default defineNuxtModule<ModuleOptions>({
       getContents: async () => {
         const { spriteMap, spriteContent } = await generateSprites(inputPath, outputPath, options)
         
-        return `export const spriteMap = ${JSON.stringify(spriteMap, null, 2)}
-export const spriteContent = ${JSON.stringify(spriteContent, null, 2)}
-export const options = ${JSON.stringify(options, null, 2)}`
+        // 使用安全的 JSON 字串化處理
+        return `export const spriteMap = ${safeStringify(spriteMap)}
+export const spriteContent = ${safeStringify(spriteContent)}
+export const options = ${safeStringify(options)}`
       }
     })
     
