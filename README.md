@@ -226,21 +226,20 @@ assets/svg/
 # Install dependencies
 npm install
 
-# Generate type stubs
+# Generate type stubs and prepare development environment
 npm run dev:prepare
 
 # Develop with the playground
 npm run dev
 
+# Build the playground
+npm run dev:build
+
 # Build the module
-npm run build
+npm run prepack
 
-# Run ESLint
-npm run lint
-
-# Run Vitest
-npm run test
-npm run test:watch
+# Run type checking
+npm run test:types
 
 # Release new version
 npm run release

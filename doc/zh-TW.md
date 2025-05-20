@@ -221,24 +221,23 @@ assets/svg/
 ## 開發
 
 ```bash
-# 安裝依賴項
+# 安裝依賴
 npm install
 
-# 生成型別存根
+# 生成類型存根並準備開發環境
 npm run dev:prepare
 
-# 使用 playground 開發
+# 在 playground 中開發
 npm run dev
 
-# 建構模組
-npm run build
+# 建置 playground
+npm run dev:build
 
-# 執行 ESLint
-npm run lint
+# 建置模組
+npm run prepack
 
-# 執行 Vitest
-npm run test
-npm run test:watch
+# 執行類型檢查
+npm run test:types
 
 # 發布新版本
 npm run release

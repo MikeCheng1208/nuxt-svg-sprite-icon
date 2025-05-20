@@ -220,23 +220,22 @@ assets/svg/
 # 依存関係をインストール
 npm install
 
-# 型スタブを生成
+# 型定義スタブを生成し、開発環境を準備
 npm run dev:prepare
 
 # プレイグラウンドで開発
 npm run dev
 
+# プレイグラウンドをビルド
+npm run dev:build
+
 # モジュールをビルド
-npm run build
+npm run prepack
 
-# ESLint を実行
-npm run lint
+# 型チェックを実行
+npm run test:types
 
-# Vitest を実行
-npm run test
-npm run test:watch
-
-# 新しいバージョンをリリース
+# 新バージョンをリリース
 npm run release
 ```
 
