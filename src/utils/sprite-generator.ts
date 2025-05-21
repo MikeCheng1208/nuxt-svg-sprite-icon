@@ -32,7 +32,7 @@ export async function generateSprites(inputPath: string, outputPath: string, opt
     }
     
     const svgContent = await readFile(filePath, 'utf-8')
-    const processedSvg = options.optimize ? processSvg(svgContent, options.svgoOptions) : svgContent
+    const processedSvg = options.optimize ? processSvg(svgContent) : svgContent
     
     groups[spriteName].push({
       path: relativePath.replace(/\//g, '/'),

@@ -1,4 +1,4 @@
-export function processSvg(svgContent: string, options: any = {}) {
+export function processSvg(svgContent: string) {
   // 移除固定的 width 和 height 屬性，讓 CSS 控制尺寸
   let processed = svgContent
     .replace(/\s*width="[^"]*"/g, '') 

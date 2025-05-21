@@ -4,9 +4,7 @@ import type { ModuleOptions } from './types'
 import { generateSprites } from './utils/sprite-generator'
 
 
-// 為虛擬模組類型宣告
 declare global {
-  // 此模組在編譯時生成，運行時可用
   const $SvgSpriteData: {
     spriteContent: Record<string, string>;
     options: ModuleOptions;

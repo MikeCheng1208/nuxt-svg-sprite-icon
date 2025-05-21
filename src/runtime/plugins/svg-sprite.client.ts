@@ -15,7 +15,7 @@ export default defineNuxtPlugin({
       return {};
     }
 
-    console.log('SVG 模組已載入', Object.keys(spriteContent).length, '個 SVG 檔案');
+    // console.log('SVG 模組已載入', Object.keys(spriteContent).length, '個 SVG 檔案');
 
     // 添加 SVG sprite 容器到 DOM
     const addSpriteContainer = () => {
@@ -44,7 +44,7 @@ export default defineNuxtPlugin({
       for (const [name, content] of Object.entries(spriteContent)) {
         if (content) {
           spriteContainer.innerHTML += content;
-          console.log(`添加 SVG: ${name}`);
+          // console.log(`添加 SVG: ${name}`);
         }
       }
       
@@ -52,7 +52,7 @@ export default defineNuxtPlugin({
       if (spriteContainer.innerHTML) {
         document.body.insertBefore(spriteContainer, document.body.firstChild);
         state.isSpriteContainerAdded = true;
-        console.log('SVG sprite 容器已添加到 DOM');
+        // console.log('SVG sprite 容器已添加到 DOM');
       } else {
         console.warn('SVG sprite 容器為空，未添加到 DOM');
       }
