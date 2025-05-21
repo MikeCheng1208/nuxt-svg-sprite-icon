@@ -1,12 +1,7 @@
 <script setup lang="ts">
-import { computed, defineComponent } from "vue";
+import { computed } from "vue";
 // 直接從模板導入選項
 import { options as svgOptions } from "#svg-sprite-data";
-
-// 明確定義組件名稱以幫助 DevTools 識別
-defineComponent({
-  name: "SvgIcon",
-});
 
 type Props = {
   name: string;
@@ -27,12 +22,6 @@ const options = {
   ...svgOptions,
 };
 
-// 檢查是否啟用了 DevTools 兼容模式
-const isDevToolsCompat =
-  svgOptions.devtoolsCompat !== false &&
-  svgOptions._internal &&
-  svgOptions._internal.hasDevTools;
-
 const symbolName = computed(() => {
   if (props.name.includes("/")) {
     return props.name.replace("/", "-");
@@ -44,18 +33,7 @@ const svgClass = computed(() => {
   return options.elementClass;
 });
 
-const href = computed(() => {
-  // 使用完整 URL 形式可以提高與某些工具的兼容性
-  return isDevToolsCompat ? `#${symbolName.value}` : `#${symbolName.value}`;
-});
-
-// 暴露組件屬性，以幫助 DevTools 檢測
-defineExpose({
-  symbolName,
-  svgClass,
-  href,
-  props,
-});
+const href = computed(() => `#${symbolName.value}`);
 </script>
 
 <template>

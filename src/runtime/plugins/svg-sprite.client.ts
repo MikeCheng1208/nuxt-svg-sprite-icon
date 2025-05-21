@@ -17,18 +17,10 @@ export default defineNuxtPlugin({
 
     // console.log('SVG 模組已載入', Object.keys(spriteContent).length, '個 SVG 檔案');
 
-    // 檢查是否應該注入 DOM 容器
-    const shouldInject = options.injectDOMContainer !== false;
-    
-    // 檢查 DevTools 兼容模式
-    const isDevToolsCompat = options.devtoolsCompat !== false && 
-                            options._internal && 
-                            options._internal.hasDevTools;
-
     // 添加 SVG sprite 容器到 DOM
     const addSpriteContainer = () => {
-      // 如果不應該注入或已經添加，則返回
-      if (!shouldInject || state.isSpriteContainerAdded || !document || !document.body) return;
+      
+      if (state.isSpriteContainerAdded || !document || !document.body) return;
       
       
       if (!spriteContent || Object.keys(spriteContent).length === 0) {
@@ -58,33 +50,23 @@ export default defineNuxtPlugin({
       
       // 有內容才添加
       if (spriteContainer.innerHTML) {
-        // 在 DevTools 兼容模式下，使用更安全的方式注入
-        if (isDevToolsCompat) {
-          // 使用 requestAnimationFrame 確保在 DOM 完全準備好後再注入
-          requestAnimationFrame(() => {
-            document.body.insertBefore(spriteContainer, document.body.firstChild);
-            state.isSpriteContainerAdded = true;
-          });
-        } else {
-          document.body.insertBefore(spriteContainer, document.body.firstChild);
-          state.isSpriteContainerAdded = true;
-        }
+        document.body.insertBefore(spriteContainer, document.body.firstChild);
+        state.isSpriteContainerAdded = true;
+        // console.log('SVG sprite 容器已添加到 DOM');
       } else {
         console.warn('SVG sprite 容器為空，未添加到 DOM');
       }
     };
 
     // 初始化 SVG sprite
-    if (shouldInject) {
-      if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        // 文檔已加載完成，立即添加
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      // 文檔已加載完成，立即添加
+      addSpriteContainer();
+    } else {
+      // 等待 DOM 完全加載
+      document.addEventListener('DOMContentLoaded', () => {
         addSpriteContainer();
-      } else {
-        // 等待 DOM 完全加載
-        document.addEventListener('DOMContentLoaded', () => {
-          addSpriteContainer();
-        });
-      }
+      });
     }
 
 
@@ -92,10 +74,8 @@ export default defineNuxtPlugin({
       provide: {
         svgSprite: {
           reload: () => {
-            if (shouldInject) {
-              state.isSpriteContainerAdded = false;
-              addSpriteContainer();
-            }
+            state.isSpriteContainerAdded = false;
+            addSpriteContainer();
           },
           getOptions: () => {
             return options;
