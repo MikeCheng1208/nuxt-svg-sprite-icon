@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, defineComponent } from "vue";
+import { ref, computed, onMounted } from "vue";
+// 直接從模板導入選項
+import { options as svgOptions } from "#svg-sprite-data";
+
 type Props = {
   name: string;
   sprite?: string;
@@ -12,12 +15,20 @@ const props = withDefaults(defineProps<Props>(), {
 // 添加此行，幫助 Nuxt DevTools 找到元件源代碼位置
 const __file = "src/runtime/components/SvgIcon.vue";
 
-const spriteData = ref<any>(null);
+// 默認選項
+const defaultOptions = {
+  defaultSprite: "icons",
+  elementClass: "svg-icon",
+};
+
+// 合併選項
+const options = {
+  ...defaultOptions,
+  ...svgOptions,
+};
 
 // 解析 sprite 和 symbol 名稱
 const spriteName = computed(() => {
-  if (!spriteData.value) return "icons";
-
   if (props.sprite) return props.sprite;
 
   // 如果 name 包含 '/'，使用第一部分作為 sprite 名稱
@@ -25,7 +36,7 @@ const spriteName = computed(() => {
     return props.name.split("/")[0];
   }
 
-  return spriteData.value.options.defaultSprite;
+  return options.defaultSprite;
 });
 
 const symbolName = computed(() => {
@@ -35,28 +46,13 @@ const symbolName = computed(() => {
   return props.name;
 });
 
-//
+// SVG 類別
 const svgClass = computed(() => {
-  if (!spriteData.value) return "svg-icon";
-  return spriteData.value.options.elementClass;
+  return options.elementClass;
 });
 
-//  href
+// href 屬性
 const href = computed(() => `#${symbolName.value}`);
-
-onMounted(async () => {
-  // @ts-ignore - Nuxt 將在運行時解析模組
-  spriteData.value = await import("#svg-sprite-map");
-
-  // 如果載入失敗提供預設值
-  if (!spriteData.value) {
-    spriteData.value = {
-      spriteMap: {},
-      spriteContent: {},
-      options: { defaultSprite: "icons", elementClass: "svg-icon" },
-    };
-  }
-});
 </script>
 
 <template>

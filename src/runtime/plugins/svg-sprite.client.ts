@@ -1,45 +1,30 @@
 import { defineNuxtPlugin } from '#app'
+// 直接從模板導入 SVG 數據
+import { spriteContent, options } from '#svg-sprite-data'
 
 // 保存全局組件的 State
 const state = {
-  spriteContent: null as Record<string, string> | null,
   isSpriteContainerAdded: false
 };
 
 export default defineNuxtPlugin({
   name: 'svg-sprite-icon-client',
-  setup() {
+  setup(nuxtApp) {
     // 防止在服務器端運行
     if (process.server) {
       return {};
     }
 
-    // 載入並初始化SVG sprites的函數
-    const loadSpriteContent = async () => {
-      if (state.spriteContent) return state.spriteContent;
-      
-      try {
-        // @ts-ignore - Nuxt 運行時處理
-        const svgSpriteMap = await import('#svg-sprite-map');
-        
-        if (svgSpriteMap && typeof svgSpriteMap.spriteContent === 'object') {
-          state.spriteContent = svgSpriteMap.spriteContent || {};
-          return state.spriteContent;
-        }
-      } catch (error) {
-        console.error('無法載入 SVG sprite 映射:', error);
-      }
-      
-      return {};
-    };
+    console.log('SVG 模組已載入', Object.keys(spriteContent).length, '個 SVG 檔案');
 
-    // 添加SVG sprite容器到DOM
-    const addSpriteContainer = async () => {
-      // 多重檢查以避免重複添加
+    // 添加 SVG sprite 容器到 DOM
+    const addSpriteContainer = () => {
+      // 檢查已經存在或缺少必要條件
       if (state.isSpriteContainerAdded || !document || !document.body) return;
       
-      const spriteContent = await loadSpriteContent();
+      // 如果沒有 SVG 內容則返回
       if (!spriteContent || Object.keys(spriteContent).length === 0) {
+        console.warn('沒有找到任何 SVG 內容');
         return;
       }
       
@@ -56,9 +41,10 @@ export default defineNuxtPlugin({
       spriteContainer.setAttribute('aria-hidden', 'true');
       
       // 將所有 sprite 內容加入到容器中
-      for (const content of Object.values(spriteContent)) {
+      for (const [name, content] of Object.entries(spriteContent)) {
         if (content) {
           spriteContainer.innerHTML += content;
+          console.log(`添加 SVG: ${name}`);
         }
       }
       
@@ -66,6 +52,9 @@ export default defineNuxtPlugin({
       if (spriteContainer.innerHTML) {
         document.body.insertBefore(spriteContainer, document.body.firstChild);
         state.isSpriteContainerAdded = true;
+        console.log('SVG sprite 容器已添加到 DOM');
+      } else {
+        console.warn('SVG sprite 容器為空，未添加到 DOM');
       }
     };
 
@@ -83,9 +72,12 @@ export default defineNuxtPlugin({
     return {
       provide: {
         svgSprite: {
-          reload: async () => {
+          reload: () => {
             state.isSpriteContainerAdded = false;
-            await addSpriteContainer();
+            addSpriteContainer();
+          },
+          getOptions: () => {
+            return options;
           }
         }
       }

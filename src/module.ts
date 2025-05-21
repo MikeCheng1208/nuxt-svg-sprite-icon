@@ -1,24 +1,16 @@
 import { defineNuxtModule, addComponent, addPlugin, createResolver, addTemplate } from '@nuxt/kit'
 import { join } from 'path'
-import { writeFileSync, mkdirSync, existsSync } from 'fs'
 import type { ModuleOptions } from './types'
 import { generateSprites } from './utils/sprite-generator'
 
-/**
- * 安全地將 SVG 內容轉換為 JavaScript 安全的形式
- * 使用來避免在 JavaScript 中直接使用可能會出現語法問題的 SVG 內容
- */
-function sanitizeSvgForJs(svg: string): string {
-  // 避免用於生成正則表達式的字符
-  return svg
-    .replace(/\\/g, '\\\\')      // 雙倍轉義反斜線
-    .replace(/'/g, "\\'")        // 轉義單引號
-    .replace(/"/g, '\\"')        // 轉義雙引號
-    .replace(/\u2028/g, '\\u2028') // 轉義行分隔符
-    .replace(/\u2029/g, '\\u2029') // 轉義段落分隔符
-    .replace(/\//g, '\\/')       // 轉義正斜線，防止被誤認為正則表達式結束
-    .replace(/</g, '\\x3C')      // 轉義小於號
-    .replace(/>/g, '\\x3E');     // 轉義大於號
+
+// 為虛擬模組類型宣告
+declare global {
+  // 此模組在編譯時生成，運行時可用
+  const $SvgSpriteData: {
+    spriteContent: Record<string, string>;
+    options: ModuleOptions;
+  }
 }
 
 export default defineNuxtModule<ModuleOptions>({
@@ -44,10 +36,47 @@ export default defineNuxtModule<ModuleOptions>({
     const inputPath = nuxt.options.alias[options.input!] || join(nuxt.options.srcDir, options.input!.replace('~/', ''))
     const outputPath = nuxt.options.alias[options.output!] || join(nuxt.options.srcDir, options.output!.replace('~/', ''))
     
-    // 確保輸出目錄存在
-    if (!existsSync(outputPath)) {
-      mkdirSync(outputPath, { recursive: true })
+    // 生成 SVG Sprites
+    const { spriteMap, spriteContent } = await generateSprites(inputPath, outputPath, options)
+    
+    // 將 SVG 內容安全轉換為 JavaScript 字串
+    const escapeSvg = (svg: string) => {
+      return svg
+        .replace(/\\/g, '\\\\')
+        .replace(/`/g, '\\`')
+        .replace(/\$/g, '\\$')
     }
+    
+    // 創建一個直接包含 SVG 內容的模板
+    const svgTemplate = addTemplate({
+      filename: 'svg-sprite-data.mjs',
+      write: true,
+      getContents: () => {
+        // 將 SVG 內容轉換為 JavaScript 字串
+        let svgModuleContent = 'export const spriteContent = {\n'
+        
+        for (const [key, content] of Object.entries(spriteContent)) {
+          svgModuleContent += `  "${key}": \`${escapeSvg(content)}\`,\n`
+        }
+        
+        svgModuleContent += '}\n\n'
+        svgModuleContent += `export const options = ${JSON.stringify(options, null, 2)}\n`
+        
+        return svgModuleContent
+      }
+    })
+    
+    // 為虛擬模組創建類型宣告文件
+    addTemplate({
+      filename: 'svg-sprite-data.d.ts',
+      write: true,
+      getContents: () => `
+declare module '#svg-sprite-data' {
+  export const spriteContent: Record<string, string>;
+  export const options: any;
+}
+`
+    })
     
     // 註冊組件
     addComponent({
@@ -57,73 +86,14 @@ export default defineNuxtModule<ModuleOptions>({
       chunkName: 'components/svg-icon'
     })
     
-    // 添加SVG Sprite插件
+    // 添加插件
     addPlugin({
       src: resolve('./runtime/plugins/svg-sprite.client'),
       mode: 'client'
     })
     
-    // 生成 sprite 到實際檔案，然後只在虛擬模組中引用路徑
-    const generateAndSaveSprites = async () => {
-      const { spriteMap, spriteContent } = await generateSprites(inputPath, outputPath, options)
-      
-      // 將 sprite 內容寫入到實際檔案
-      for (const [spriteName, content] of Object.entries(spriteContent)) {
-        const spritePath = join(outputPath, `${spriteName}.svg`)
-        writeFileSync(spritePath, content, 'utf8')
-      }
-      
-      // 將映射寫入檔案
-      const mapPath = join(outputPath, 'sprite-map.json')
-      writeFileSync(mapPath, JSON.stringify({
-        spriteMap,
-        options
-      }, null, 2), 'utf8')
-      
-      return { spriteMap, mapPath }
-    }
-    
-    // 首次生成 sprite
-    const { spriteMap, mapPath } = await generateAndSaveSprites()
-    
-    // 生成一個映射文件，只包含引用
-    const mapTemplate = addTemplate({
-      filename: 'svg-sprite-map.mjs',
-      write: true,
-      getContents: async () => {
-        return `// 此檔案由 nuxt-svg-sprite 模組生成
-import { fileURLToPath } from 'url'
-import { readFileSync } from 'fs'
-import { dirname, join } from 'path'
-
-// 讀取 sprite 映射檔案
-const __dirname = dirname(fileURLToPath(import.meta.url))
-const mapPath = join(__dirname, '${mapPath.replace(nuxt.options.buildDir, '').replace(/\\/g, '/')}')
-const map = JSON.parse(readFileSync(mapPath, 'utf8'))
-
-// 讀取所有 sprite SVG 檔案
-const spriteContent = {}
-for (const [spriteName, info] of Object.entries(map.spriteMap)) {
-  try {
-    const path = join(__dirname, '${outputPath.replace(nuxt.options.buildDir, '').replace(/\\/g, '/')}', \`\${spriteName}.svg\`)
-    spriteContent[spriteName] = readFileSync(path, 'utf8')
-  } catch (e) {
-    console.warn(\`無法讀取 \${spriteName}.svg\`, e)
-  }
-}
-
-export const spriteMap = map.spriteMap
-export const options = map.options
-export { spriteContent }
-`
-      }
-    })
-    
-    // 註冊虛擬模組
-    nuxt.hook('nitro:config', (nitroConfig) => {
-      nitroConfig.virtual = nitroConfig.virtual || {}
-      nitroConfig.virtual['#svg-sprite-map'] = `${mapTemplate.dst}`
-    })
+    // 將 SVG 模板添加到虛擬導入中
+    nuxt.options.alias['#svg-sprite-data'] = svgTemplate.dst
     
     // 為檔案添加到 nuxt.options.watch 中，讓 Nuxt 內建的 HMR 機制處理
     if (nuxt.options.dev && options.watchFiles) {
@@ -134,21 +104,18 @@ export { spriteContent }
       }
       nuxt.options.watch.push(svgPattern);
       
-      // 監控文件變化
+      // 監控文件變化時重新生成
       nuxt.hook('builder:watch', (event, path) => {
         if (path.endsWith('.svg') && path.includes(inputPath)) {
-          // 當 SVG 文件變化時，重新生成
-          void generateAndSaveSprites().then(() => {
-            // 通知有更新但不觸發完整重新構建
-            nuxt.callHook('builder:generateApp')
-          })
+          // 觸發全頁重新載入
+          nuxt.callHook('builder:generateApp')
         }
       })
     }
     
-    // 建構時重新生成 sprites
+    // 建構時生成 sprites
     nuxt.hook('build:before', async () => {
-      await generateAndSaveSprites()
+      await generateSprites(inputPath, outputPath, options)
     })
   }
 })
