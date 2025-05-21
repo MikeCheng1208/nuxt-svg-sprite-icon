@@ -1,6 +1,6 @@
 {
   "name": "nuxt-svg-sprite-icon",
-  "version": "1.0.40",
+  "version": "1.0.41",
   "description": "A powerful SVG sprite module for Nuxt 3 that automatically generates SVG sprites from your assets and provides an easy-to-use component for displaying icons.",
   "repository": {
     "type": "git",
