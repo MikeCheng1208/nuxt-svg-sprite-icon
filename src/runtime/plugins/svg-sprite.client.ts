@@ -1,5 +1,5 @@
 import { defineNuxtPlugin } from '#app'
-import { spriteContent } from '#svg-sprite-data'
+import { spriteContent, options } from '#svg-sprite-data'
 
 
 const state = {
@@ -9,13 +9,11 @@ const state = {
 export default defineNuxtPlugin({
   name: 'svg-sprite-icon-client',
   setup() {
-
-    console.log('process.server', process.server);
+    
     
     if (process.server) {
       return {};
     }
-
 
     // console.log('SVG 模組已載入', Object.keys(spriteContent).length, '個 SVG 檔案');
 
@@ -72,6 +70,18 @@ export default defineNuxtPlugin({
     }
 
 
-    return {};
+    return {
+      provide: {
+        svgSprite: {
+          reload: () => {
+            state.isSpriteContainerAdded = false;
+            addSpriteContainer();
+          },
+          getOptions: () => {
+            return options;
+          }
+        }
+      }
+    };
   }
 })
