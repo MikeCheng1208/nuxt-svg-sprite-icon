@@ -3,20 +3,21 @@ import { join } from 'path'
 import type { ModuleOptions } from './types'
 import { generateSprites } from './utils/sprite-generator'
 
-// 安全地將物件轉換為 JSON 字串，特別處理正則表達式問題
-function safeStringify(obj: any): string {
-  // 移除或轉義可能導致正則表達式錯誤的內容
-  return JSON.stringify(obj, (key, value) => {
-    // 處理特殊字符，尤其是正則表達式中常見的問題字符
-    if (typeof value === 'string') {
-      // 轉義可能在正則表達式中產生問題的反斜線、斜線和特殊控制字符
-      return value
-        .replace(/\\/g, '\\\\')  // 雙重轉義反斜線
-        .replace(/\u2028/g, '\\u2028')  // 處理行分隔符
-        .replace(/\u2029/g, '\\u2029'); // 處理段落分隔符
-    }
-    return value;
-  }, 2);
+/**
+ * 安全地將 SVG 內容轉換為 JavaScript 安全的形式
+ * 使用來避免在 JavaScript 中直接使用可能會出現語法問題的 SVG 內容
+ */
+function sanitizeSvgForJs(svg: string): string {
+  // 避免用於生成正則表達式的字符
+  return svg
+    .replace(/\\/g, '\\\\')      // 雙倍轉義反斜線
+    .replace(/'/g, "\\'")        // 轉義單引號
+    .replace(/"/g, '\\"')        // 轉義雙引號
+    .replace(/\u2028/g, '\\u2028') // 轉義行分隔符
+    .replace(/\u2029/g, '\\u2029') // 轉義段落分隔符
+    .replace(/\//g, '\\/')       // 轉義正斜線，防止被誤認為正則表達式結束
+    .replace(/</g, '\\x3C')      // 轉義小於號
+    .replace(/>/g, '\\x3E');     // 轉義大於號
 }
 
 export default defineNuxtModule<ModuleOptions>({
@@ -56,21 +57,38 @@ export default defineNuxtModule<ModuleOptions>({
       mode: 'client'
     })
     
-    // 使用 addTemplate 生成 sprite 映射模板
+    // 完全避免使用 JSON.stringify 處理 SVG 內容
     const spriteMapTemplate = addTemplate({
       filename: 'svg-sprite-map.mjs',
       write: true,
       getContents: async () => {
         const { spriteMap, spriteContent } = await generateSprites(inputPath, outputPath, options)
         
-        // 使用安全的 JSON 字串化處理
-        return `export const spriteMap = ${safeStringify(spriteMap)}
-export const spriteContent = ${safeStringify(spriteContent)}
-export const options = ${safeStringify(options)}`
+        // 將 spriteContent 直接寫入為 JavaScript 代碼，避免 JSON.stringify
+        let jsContent = '// 此檔案由 nuxt-svg-sprite 模組生成\n\n';
+        
+        // 處理 spriteMap
+        jsContent += `export const spriteMap = ${JSON.stringify(spriteMap, null, 2)};\n\n`;
+        
+        // 直接處理 spriteContent
+        jsContent += 'export const spriteContent = {\n';
+        for (const [key, value] of Object.entries(spriteContent)) {
+          if (typeof value === 'string') {
+            // 將 SVG 內容處理為 JavaScript 安全的字串
+            const sanitizedValue = sanitizeSvgForJs(value);
+            jsContent += `  "${key}": "${sanitizedValue}",\n`;
+          }
+        }
+        jsContent += '};\n\n';
+        
+        // 處理 options
+        jsContent += `export const options = ${JSON.stringify(options, null, 2)};\n`;
+        
+        return jsContent;
       }
     })
     
-    // 註冊虛擬模組 - 使用 nitro:config 鉤子而非直接修改 alias
+    // 註冊虛擬模組
     nuxt.hook('nitro:config', (nitroConfig) => {
       nitroConfig.virtual = nitroConfig.virtual || {}
       nitroConfig.virtual['#svg-sprite-map'] = `${spriteMapTemplate.dst}`
