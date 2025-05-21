@@ -69,7 +69,18 @@ export default defineNuxtPlugin({
     }
 
 
-
-    return {};
+    return {
+      provide: {
+        svgSprite: {
+          reload: () => {
+            state.isSpriteContainerAdded = false;
+            addSpriteContainer();
+          },
+          getOptions: () => {
+            return options;
+          }
+        }
+      }
+    };
   }
 })
