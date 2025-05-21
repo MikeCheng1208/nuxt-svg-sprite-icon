@@ -10,7 +10,7 @@ export default defineNuxtPlugin({
   name: 'svg-sprite-icon-client',
   setup() {
     // 防止在服務器端運行
-    if (process.server) {
+    if (import.meta.server) {
       return {};
     }
 
