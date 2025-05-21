@@ -10,7 +10,7 @@ export default defineNuxtPlugin({
   name: 'svg-sprite-icon-client',
   setup() {
     // 防止在服務器端運行
-    if (import.meta.server) {
+    if (process.server) {
       return {};
     }
 
@@ -70,18 +70,6 @@ export default defineNuxtPlugin({
 
 
 
-    return {
-      provide: {
-        svgSprite: {
-          reload: () => {
-            state.isSpriteContainerAdded = false;
-            addSpriteContainer();
-          },
-          getOptions: () => {
-            return options;
-          }
-        }
-      }
-    };
+    return {};
   }
 })
