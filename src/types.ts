@@ -1,4 +1,4 @@
-export interface ModuleOptions {
+export type ModuleOptions = {
   input?: string;
   output?: string;
   defaultSprite?: string;
