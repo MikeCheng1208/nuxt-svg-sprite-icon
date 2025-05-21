@@ -6,6 +6,8 @@ export type ModuleOptions = {
   optimize?: boolean;
   svgoOptions?: any;
   watchFiles?: boolean;
+  devtoolsCompat?: boolean;
+  injectDOMContainer?: boolean;
 }
 
 export type SpriteMap = {

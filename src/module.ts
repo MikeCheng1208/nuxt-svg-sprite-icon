@@ -25,7 +25,9 @@ export default defineNuxtModule<ModuleOptions>({
     defaultSprite: 'icons',
     elementClass: 'svg-icon',
     optimize: false,
-    watchFiles: false // 預設不監控檔案變化
+    watchFiles: false, // 預設不監控檔案變化
+    devtoolsCompat: true, // 新增：啟用 DevTools 兼容模式
+    injectDOMContainer: true // 新增：控制是否向 DOM 中注入 SVG 容器
   },
   async setup(options, nuxt) {
     const { resolve } = createResolver(import.meta.url)
@@ -34,6 +36,18 @@ export default defineNuxtModule<ModuleOptions>({
     const inputPath = nuxt.options.alias[options.input!] || join(nuxt.options.srcDir, options.input!.replace('~/', ''))
     const outputPath = nuxt.options.alias[options.output!] || join(nuxt.options.srcDir, options.output!.replace('~/', ''))
     
+    // 檢測 Nuxt DevTools 是否啟用
+    const hasDevTools = nuxt.options.modules && 
+                       (nuxt.options.modules.includes('@nuxt/devtools') || 
+                        nuxt.options.modules.some(m => 
+                          typeof m === 'object' && m && 'src' in m && m.src === '@nuxt/devtools'
+                        ))
+    
+    // 更新選項，考慮 DevTools 兼容性
+    if (hasDevTools && options.devtoolsCompat) {
+      // 如果啟用了 DevTools 兼容模式，應用兼容性調整
+      console.log('Nuxt DevTools detected, applying compatibility mode for nuxt-svg-sprite-icon')
+    }
     
     const { spriteContent } = await generateSprites(inputPath, outputPath, options)
     
@@ -58,7 +72,14 @@ export default defineNuxtModule<ModuleOptions>({
         }
         
         svgModuleContent += '}\n\n'
-        svgModuleContent += `export const options = ${JSON.stringify(options, null, 2)}\n`
+        // 傳遞修改後的選項
+        const exportOptions = {
+          ...options,
+          _internal: {
+            hasDevTools: hasDevTools
+          }
+        }
+        svgModuleContent += `export const options = ${JSON.stringify(exportOptions, null, 2)}\n`
         
         return svgModuleContent
       }

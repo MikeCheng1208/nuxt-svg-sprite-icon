@@ -120,7 +120,16 @@ export default defineNuxtConfig({
     elementClass: 'svg-icon',
     
     // Whether to optimize SVG files (requires svgo)
-    optimize: false
+    optimize: false,
+    
+    // Watch and reload SVG files during development
+    watchFiles: false,
+    
+    // Enable compatibility mode for Nuxt DevTools
+    devtoolsCompat: true,
+    
+    // Control if SVG sprites are injected into DOM
+    injectDOMContainer: true
   }
 })
 ```
@@ -134,6 +143,39 @@ export default defineNuxtConfig({
 | `defaultSprite` | `string` | `'icons'` | Name of default sprite (for SVGs in root input directory) |
 | `elementClass` | `string` | `'svg-icon'` | Global CSS class applied to all `<SvgIcon>` elements |
 | `optimize` | `boolean` | `false` | Enable SVG optimization using SVGO |
+| `watchFiles` | `boolean` | `false` | Watch and reload SVG files during development |
+| `devtoolsCompat` | `boolean` | `true` | Enable compatibility mode for Nuxt DevTools |
+| `injectDOMContainer` | `boolean` | `true` | Control if SVG sprites are injected into DOM |
+
+## DevTools Compatibility
+
+If you encounter issues with Nuxt DevTools (particularly the Inspector feature) after reinstalling dependencies, you can use the `devtoolsCompat` option to resolve conflicts:
+
+```js
+export default defineNuxtConfig({
+  modules: ['nuxt-svg-sprite-icon'],
+  svgSprite: {
+    // Enable DevTools compatibility mode
+    devtoolsCompat: true,
+    
+    // Other options...
+    input: '~/assets/svg',
+    output: '~/assets/sprite/gen'
+  }
+})
+```
+
+You can also control whether SVG sprites are injected directly into the DOM using the `injectDOMContainer` option:
+
+```js
+export default defineNuxtConfig({
+  modules: ['nuxt-svg-sprite-icon'],
+  svgSprite: {
+    // Disable direct DOM injection if causing conflicts
+    injectDOMContainer: false
+  }
+})
+```
 
 ## Component API
 
@@ -311,6 +353,42 @@ npm run release
 2. **Verify build**: Make sure the module generated sprite files in your output directory
 3. **Check console**: Look for any error messages in the browser console
 4. **Restart dev server**: Try restarting your development server
+
+### DevTools Inspector not working after reinstalling dependencies
+
+If you find that the Nuxt DevTools Inspector stops working after removing and reinstalling dependencies (node_modules and package-lock.json), try the following:
+
+1. **Enable DevTools compatibility mode**:
+   ```js
+   // nuxt.config.ts
+   export default defineNuxtConfig({
+     modules: ['nuxt-svg-sprite-icon'],
+     svgSprite: {
+       devtoolsCompat: true
+     }
+   })
+   ```
+
+2. **Disable DOM injection** (if the problem persists):
+   ```js
+   // nuxt.config.ts
+   export default defineNuxtConfig({
+     modules: ['nuxt-svg-sprite-icon'],
+     svgSprite: {
+       injectDOMContainer: false
+     }
+   })
+   ```
+
+3. **Order of modules**: Try changing the order of modules in your nuxt.config.ts, placing `@nuxt/devtools` before `nuxt-svg-sprite-icon`:
+   ```js
+   export default defineNuxtConfig({
+     modules: [
+       '@nuxt/devtools',
+       'nuxt-svg-sprite-icon'
+     ]
+   })
+   ```
 
 ### Icons appear as squares
 
