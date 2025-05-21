@@ -1,17 +1,16 @@
 import { defineNuxtPlugin } from '#app'
-// 直接從模板導入 SVG 數據
 import { spriteContent, options } from '#svg-sprite-data'
 
-// 保存全局組件的 State
+
 const state = {
   isSpriteContainerAdded: false
 };
 
 export default defineNuxtPlugin({
   name: 'svg-sprite-icon-client',
-  setup(nuxtApp) {
+  setup() {
     // 防止在服務器端運行
-    if (process.server) {
+    if (import.meta.server) {
       return {};
     }
 
@@ -19,16 +18,16 @@ export default defineNuxtPlugin({
 
     // 添加 SVG sprite 容器到 DOM
     const addSpriteContainer = () => {
-      // 檢查已經存在或缺少必要條件
+      
       if (state.isSpriteContainerAdded || !document || !document.body) return;
       
-      // 如果沒有 SVG 內容則返回
+      
       if (!spriteContent || Object.keys(spriteContent).length === 0) {
         console.warn('沒有找到任何 SVG 內容');
         return;
       }
       
-      // 檢查是否已經存在此容器
+      // 檢查是否已經存在
       const existingContainer = document.getElementById('nuxt-svg-sprite-container');
       if (existingContainer) {
         existingContainer.remove();
@@ -69,18 +68,6 @@ export default defineNuxtPlugin({
       });
     }
 
-    return {
-      provide: {
-        svgSprite: {
-          reload: () => {
-            state.isSpriteContainerAdded = false;
-            addSpriteContainer();
-          },
-          getOptions: () => {
-            return options;
-          }
-        }
-      }
-    };
+    return {};
   }
 })

@@ -13,7 +13,7 @@ export async function generateSprites(inputPath: string, outputPath: string, opt
     await mkdir(outputPath, { recursive: true })
   }
   
-  // 遞歸讀取所有 SVG 檔案
+  // 讀取所有 SVG 檔案
   const svgFiles = await getSvgFiles(inputPath)
   
   // 按資料夾分組
