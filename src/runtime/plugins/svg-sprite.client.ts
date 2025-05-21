@@ -18,13 +18,18 @@ export default defineNuxtPlugin({
     const loadSpriteContent = async () => {
       if (state.spriteContent) return state.spriteContent;
       
-      // @ts-ignore - Nuxt 運行時處理
-      const svgSpriteMap = await import('#svg-sprite-map');
-      
-      if (svgSpriteMap && typeof svgSpriteMap.spriteContent === 'object') {
-        state.spriteContent = svgSpriteMap.spriteContent || {};
-        return state.spriteContent;
+      try {
+        // @ts-ignore - Nuxt 運行時處理
+        const svgSpriteMap = await import('#svg-sprite-map');
+        
+        if (svgSpriteMap && typeof svgSpriteMap.spriteContent === 'object') {
+          state.spriteContent = svgSpriteMap.spriteContent || {};
+          return state.spriteContent;
+        }
+      } catch (error) {
+        console.error('無法載入 SVG sprite 映射:', error);
       }
+      
       return {};
     };
 
@@ -75,6 +80,15 @@ export default defineNuxtPlugin({
       });
     }
 
-    return {};
+    return {
+      provide: {
+        svgSprite: {
+          reload: async () => {
+            state.isSpriteContainerAdded = false;
+            await addSpriteContainer();
+          }
+        }
+      }
+    };
   }
 })
