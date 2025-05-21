@@ -34,10 +34,10 @@ export default defineNuxtModule<ModuleOptions>({
     const inputPath = nuxt.options.alias[options.input!] || join(nuxt.options.srcDir, options.input!.replace('~/', ''))
     const outputPath = nuxt.options.alias[options.output!] || join(nuxt.options.srcDir, options.output!.replace('~/', ''))
     
-    // 生成 SVG Sprites
-    const { spriteMap, spriteContent } = await generateSprites(inputPath, outputPath, options)
     
-    // 將 SVG 內容安全轉換為 JavaScript 字串
+    const { spriteContent } = await generateSprites(inputPath, outputPath, options)
+    
+    
     const escapeSvg = (svg: string) => {
       return svg
         .replace(/\\/g, '\\\\')
@@ -45,12 +45,12 @@ export default defineNuxtModule<ModuleOptions>({
         .replace(/\$/g, '\\$')
     }
     
-    // 創建一個直接包含 SVG 內容的模板
+    // 創建一個直接包含 SVG 的模板
     const svgTemplate = addTemplate({
       filename: 'svg-sprite-data.mjs',
       write: true,
       getContents: () => {
-        // 將 SVG 內容轉換為 JavaScript 字串
+        
         let svgModuleContent = 'export const spriteContent = {\n'
         
         for (const [key, content] of Object.entries(spriteContent)) {
@@ -76,7 +76,7 @@ declare module '#svg-sprite-data' {
 `
     })
     
-    // 註冊組件
+    
     addComponent({
       name: 'SvgIcon',
       filePath: resolve('./runtime/components/SvgIcon.vue'),
@@ -84,7 +84,7 @@ declare module '#svg-sprite-data' {
       chunkName: 'components/svg-icon'
     })
     
-    // 添加插件
+    
     addPlugin({
       src: resolve('./runtime/plugins/svg-sprite.client'),
       mode: 'client'
@@ -93,7 +93,7 @@ declare module '#svg-sprite-data' {
     // 將 SVG 模板添加到虛擬導入中
     nuxt.options.alias['#svg-sprite-data'] = svgTemplate.dst
     
-    // 為檔案添加到 nuxt.options.watch 中，讓 Nuxt 內建的 HMR 機制處理
+    
     if (nuxt.options.dev && options.watchFiles) {
       // 使用 Nuxt 內建的監控機制
       const svgPattern = join(inputPath, '**/*.svg');
