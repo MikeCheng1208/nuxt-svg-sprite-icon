@@ -1,6 +1,6 @@
 {
   "name": "nuxt-svg-sprite-icon",
-  "version": "1.0.42",
+  "version": "1.0.43",
   "scripts": {
     "prepack": "nuxt-module-build build",
     "dev": "nuxi dev playground",

@@ -1,4 +1,7 @@
 # Nuxt SVG Sprite Icon
+<p align="center">
+  <img width="200px" src="./assets/nuxt-svg-sprite-icon.png" />
+</p>
 
 
 <p align=center>
