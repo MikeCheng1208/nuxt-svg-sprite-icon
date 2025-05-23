@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from "vue";
-// 直接從模板導入選項
 import { options as svgOptions } from "#svg-sprite-data";
 
 type Props = {
@@ -24,7 +23,7 @@ const options = {
 
 const symbolName = computed(() => {
   if (props.name.includes("/")) {
-    return props.name.replace("/", "-");
+    return props.name.replace(/\//g, "-");
   }
   return props.name;
 });
@@ -38,13 +37,12 @@ const href = computed(() => `#${symbolName.value}`);
 
 <template>
   <svg :class="svgClass" aria-hidden="true">
-    <use class="pointer-events-none" :xlink:href="href" />
+    <use :href="href" />
   </svg>
 </template>
 
 <style scoped>
-svg.svg-icon {
-  display: block;
+.svg-icon {
   vertical-align: middle;
 }
 </style>
