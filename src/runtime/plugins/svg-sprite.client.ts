@@ -1,4 +1,5 @@
 import { defineNuxtPlugin } from '#app'
+// @ts-ignore
 import { spriteContent, options } from '#svg-sprite-data'
 
 type PluginState = {

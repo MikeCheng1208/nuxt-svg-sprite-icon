@@ -33,6 +33,11 @@ export default defineNuxtModule<ModuleOptions>({
     const inputPath = resolveInputPath(options.input!, nuxt)
     const outputPath = resolveOutputPath(options.output!, nuxt)
     
+    // 調試日誌
+    logger.info(`Input path resolved to: ${inputPath}`)
+    logger.info(`Output path resolved to: ${outputPath}`)
+    logger.info(`Nuxt compatibility version: ${nuxt.options.future?.compatibilityVersion || 'default'}`)
+    
     // 驗證配置
     validateOptions(options, logger)
     
@@ -41,21 +46,29 @@ export default defineNuxtModule<ModuleOptions>({
     // 生成 sprites 的函數
     const generateSpritesWithErrorHandling = async () => {
       try {
+        logger.info(`Attempting to generate sprites from: ${inputPath}`)
         const result = await generateSprites(inputPath, outputPath, options)
         spriteContent = result.spriteContent
-        logger.success(`Generated ${Object.keys(spriteContent).length} sprite(s)`)
+        
+        if (Object.keys(spriteContent).length === 0) {
+          logger.warn(`No SVG files found in: ${inputPath}`)
+          logger.warn('Please check if the path exists and contains SVG files')
+        } else {
+          logger.success(`Generated ${Object.keys(spriteContent).length} sprite(s)`)
+        }
+        
         return result
       } catch (error) {
         logger.error('Failed to generate sprites:', error)
+        logger.error(`Input path: ${inputPath}`)
+        logger.error(`Output path: ${outputPath}`)
         spriteContent = {}
         return { spriteMap: {}, spriteContent: {} }
       }
     }
     
-    // 初始生成（僅在開發模式或構建時）
-    if (nuxt.options.dev || nuxt.options._build) {
-      await generateSpritesWithErrorHandling()
-    }
+    // 初始生成（開發模式、構建時或生產環境）
+    await generateSpritesWithErrorHandling()
     
     // 創建優化的 SVG 模板
     const svgTemplate = addTemplate({
@@ -101,14 +114,58 @@ export default defineNuxtModule<ModuleOptions>({
  * 解析輸入路徑
  */
 function resolveInputPath(input: string, nuxt: any): string {
-  return nuxt.options.alias[input] || join(nuxt.options.srcDir, input.replace('~/', ''))
+  // 處理絕對路徑
+  if (input.startsWith('./') || input.startsWith('../')) {
+    return join(nuxt.options.rootDir, input)
+  }
+  
+  // 處理別名路徑
+  if (nuxt.options.alias[input]) {
+    return nuxt.options.alias[input]
+  }
+  
+  // 處理 ~ 路徑，優先檢查 app 目錄（Nuxt 4）
+  if (input.startsWith('~/')) {
+    const relativePath = input.replace('~/', '')
+    // 先嘗試 app 目錄（Nuxt 4）
+    const appPath = join(nuxt.options.rootDir, 'app', relativePath)
+    // 再嘗試 srcDir（Nuxt 3）
+    const srcPath = join(nuxt.options.srcDir, relativePath)
+    
+    // 在構建時無法檢查檔案存在，所以根據 Nuxt 版本決定
+    return nuxt.options.future?.compatibilityVersion === 4 ? appPath : srcPath
+  }
+  
+  return join(nuxt.options.srcDir, input)
 }
 
 /**
  * 解析輸出路徑
  */
 function resolveOutputPath(output: string, nuxt: any): string {
-  return nuxt.options.alias[output] || join(nuxt.options.srcDir, output.replace('~/', ''))
+  // 處理絕對路徑
+  if (output.startsWith('./') || output.startsWith('../')) {
+    return join(nuxt.options.rootDir, output)
+  }
+  
+  // 處理別名路徑
+  if (nuxt.options.alias[output]) {
+    return nuxt.options.alias[output]
+  }
+  
+  // 處理 ~ 路徑，優先檢查 app 目錄（Nuxt 4）
+  if (output.startsWith('~/')) {
+    const relativePath = output.replace('~/', '')
+    // 先嘗試 app 目錄（Nuxt 4）
+    const appPath = join(nuxt.options.rootDir, 'app', relativePath)
+    // 再嘗試 srcDir（Nuxt 3）
+    const srcPath = join(nuxt.options.srcDir, relativePath)
+    
+    // 在構建時無法檢查檔案存在，所以根據 Nuxt 版本決定
+    return nuxt.options.future?.compatibilityVersion === 4 ? appPath : srcPath
+  }
+  
+  return join(nuxt.options.srcDir, output)
 }
 
 /**
