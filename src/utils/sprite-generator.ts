@@ -1,7 +1,7 @@
 import { readdir, readFile, writeFile, mkdir, stat } from 'fs/promises'
 import { join, relative, dirname, basename } from 'path'
 import { existsSync } from 'fs'
-import type { ModuleOptions, SpriteMap, SpriteGenerationResult } from '../types'
+import type { ModuleOptions, SpriteGenerationResult } from '../types'
 import { processSvg, svgToSymbol } from './svg-processor'
 
 // 批次處理大小，避免記憶體問題
@@ -201,6 +201,7 @@ async function processSingleSprite(
       const batchPromises = batch.map(async (fileInfo) => {
         try {
           const svgContent = await readFile(fileInfo.filePath, 'utf-8');
+          // 使用增強的處理方法來解決兼容性問題
           const processedSvg = options.optimize ? processSvg(svgContent) : svgContent;
           const symbolElement = svgToSymbol(processedSvg, fileInfo.symbolName);
           

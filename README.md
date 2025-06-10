@@ -40,6 +40,7 @@
 - 🌈 **Framework agnostic** - Works seamlessly with UnoCSS, Tailwind, or any CSS framework
 - 📦 **Zero configuration** - Works out of the box with sensible defaults
 - 🪶 **Lightweight** - Minimal API surface with maximum flexibility
+- 🔧 **Enhanced SVG compatibility** - Handles complex SVGs with styles, IDs, and defs
 
 ## Quick Setup
 
@@ -101,6 +102,54 @@ assets/
 ```
 
 That's it! You can now use SVG icons with complete CSS control ✨
+
+## SVG Compatibility
+
+This module has enhanced SVG processing capabilities that handle various types of SVG files:
+
+### ✅ Supported SVG Features
+
+- **Inline styles and CSS classes** - Automatically converts `<style>` tags and CSS classes to inline styles
+- **Complex defs and gradients** - Preserves functional definitions like clipPaths, gradients, and patterns
+- **ID conflict resolution** - Automatically prefixes IDs to prevent conflicts between different sprites
+- **Various SVG formats** - Works with SVGs from different design tools (Figma, Sketch, Illustrator, etc.)
+
+### Examples of Supported SVG Types
+
+**SVG with CSS styles:**
+```xml
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.721 17.39">
+    <defs>
+        <style>
+            .cls-1{fill:#fff}
+        </style>
+    </defs>
+    <path class="cls-1" d="M0 6.3L6 11..."/>
+</svg>
+```
+
+**SVG with inline fills:**
+```xml
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path fill="white" d="M9.84375 16.0469V19.1178..."/>
+</svg>
+```
+
+**SVG with clipPaths and complex defs:**
+```xml
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <g clip-path="url(#clip0)">
+        <path fill="white" d="..."/>
+    </g>
+    <defs>
+        <clipPath id="clip0">
+            <rect width="24" height="24"/>
+        </clipPath>
+    </defs>
+</svg>
+```
+
+All these formats are automatically processed and optimized for use in sprite systems while maintaining visual fidelity.
 
 ## Configuration
 
