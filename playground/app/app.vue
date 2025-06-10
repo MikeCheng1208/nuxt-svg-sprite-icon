@@ -22,6 +22,14 @@
         </div>
       </div>
 
+      <!-- 複雜的圖標測試 -->
+      <div class="border p-4">
+        <h2 class="text-lg mb-2">複雜的圖標（變成正方形的問題）：</h2>
+        <div class="w-100px h-100px bg-gray-100">
+          <SvgIcon name="test_complex" class="w-full h-full" />
+        </div>
+      </div>
+
       <!-- 子目錄的圖標 -->
       <div class="border p-4">
         <h2 class="text-lg mb-2">子目錄圖標：</h2>

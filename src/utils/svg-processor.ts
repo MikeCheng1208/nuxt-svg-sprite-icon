@@ -34,15 +34,18 @@ export function processCompatibleSvg(svgContent: string, symbolId: string): stri
 
   let processedContent = svgContent;
 
-  // 1. 移除固定尺寸屬性
-  processedContent = processedContent
-    .replace(SIZE_ATTRS_REGEX, '')
-    .replace(STYLE_REGEX, '');
+  // 1. 移除固定尺寸屬性，但保留其他 style 屬性
+  processedContent = processedContent.replace(SIZE_ATTRS_REGEX, '');
 
-  // 2. 處理 <defs> 內的 <style> 標籤，提取樣式並轉換為行內樣式
-  processedContent = processDefsAndStyles(processedContent, symbolId);
+  // 檢查是否包含 <style> 標籤，只在有 style 標籤的情況下進行樣式處理
+  const hasStyleTags = STYLE_TAG_REGEX.test(processedContent);
+  
+  if (hasStyleTags) {
+    // 2. 處理 <defs> 內的 <style> 標籤，提取樣式並轉換為行內樣式
+    processedContent = processDefsAndStyles(processedContent, symbolId);
+  }
 
-  // 3. 移除可能造成衝突的 ID 屬性（除了重要的功能性 ID）
+  // 3. 只處理功能性 ID 的衝突（如 clipPath, gradients 等）
   processedContent = processIdAttributes(processedContent, symbolId);
 
   return processedContent.trim();
@@ -81,7 +84,9 @@ function processDefsAndStyles(svgContent: string, symbolId: string): string {
   });
 
   // 應用提取的樣式到相應元素
-  processedContent = applyCssRulesToElements(processedContent, extractedStyles);
+  if (Object.keys(extractedStyles).length > 0) {
+    processedContent = applyCssRulesToElements(processedContent, extractedStyles);
+  }
 
   return processedContent;
 }
@@ -137,10 +142,22 @@ function applyCssRulesToElements(svgContent: string, cssRules: Record<string, st
     });
   }
   
-  // 移除所有 class 屬性（因為已經轉換為 style）
+  // 移除已處理的 class 屬性（只移除已轉換的 class，保留其他）
   for (const className of Object.keys(cssRules)) {
-    const classRegex = new RegExp(`\\s*class=["'][^"']*\\b${escapeRegex(className)}\\b[^"']*["']`, 'g');
-    processedContent = processedContent.replace(classRegex, '');
+    // 更精準地移除只包含這個特定 class 的 class 屬性
+    processedContent = processedContent.replace(
+      new RegExp(`\\s*class=["']\\s*${escapeRegex(className)}\\s*["']`, 'g'),
+      ''
+    );
+    
+    // 處理包含多個 class 的情況，只移除特定的 class
+    processedContent = processedContent.replace(
+      new RegExp(`(class=["'][^"']*)\\b${escapeRegex(className)}\\b\\s*([^"']*["'])`, 'g'),
+      '$1$2'
+    );
+    
+    // 清理空的 class 屬性
+    processedContent = processedContent.replace(/\s*class=["']\s*["']/g, '');
   }
   
   return processedContent;
