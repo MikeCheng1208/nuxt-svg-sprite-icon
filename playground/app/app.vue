@@ -2,6 +2,17 @@
   <div class="w-full h-full p-4">
     <h1 class="text-2xl mb-4">SVG Icon 測試</h1>
 
+    <div class="border p-4">
+      <h2 class="text-lg mb-2">BUY 圖標：</h2>
+      <div class="w-100px h-100px bg-red-500">
+        <SvgIcon
+          name="icon-bought"
+          class="w-24px h-20px text-white mr-8px"
+          style="fill: #b2b2b2"
+        />
+      </div>
+    </div>
+
     <div class="space-y-4">
       <!-- 原本可以顯示的圖標 -->
       <div class="border p-4">

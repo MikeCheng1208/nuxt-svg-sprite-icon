@@ -34,8 +34,8 @@ export function processCompatibleSvg(svgContent: string, symbolId: string): stri
 
   let processedContent = svgContent;
 
-  // 1. 移除固定尺寸屬性，但保留其他 style 屬性
-  processedContent = processedContent.replace(SIZE_ATTRS_REGEX, '');
+  // 1. 只移除 SVG 根元素的尺寸屬性，保留內部元素的尺寸
+  processedContent = removeSvgRootSizeAttributes(processedContent);
 
   // 檢查是否包含 <style> 標籤，只在有 style 標籤的情況下進行樣式處理
   const hasStyleTags = STYLE_TAG_REGEX.test(processedContent);
@@ -209,6 +209,22 @@ function processIdAttributes(svgContent: string, symbolId: string): string {
  */
 function escapeRegex(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * 只移除 SVG 根元素的尺寸屬性，保留內部元素的尺寸
+ */
+function removeSvgRootSizeAttributes(svgContent: string): string {
+  // 移除 <svg> 標籤中的 width 和 height 屬性
+  let result = svgContent;
+  
+  // 移除 width 屬性
+  result = result.replace(/(<svg[^>]*)\s+width="[^"]*"/g, '$1');
+  
+  // 移除 height 屬性
+  result = result.replace(/(<svg[^>]*)\s+height="[^"]*"/g, '$1');
+  
+  return result;
 }
 
 /**
