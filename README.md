@@ -7,7 +7,7 @@
 <p align=center>
     <a target="_blank" href="https://vuejs.org/" title="vue">
     <a target="_blank" href="http://nodejs.org/download/" title="Nuxt version">
-        <img src="https://img.shields.io/badge/Nuxt-%3E%3D%203.0.0-brightgreen.svg">
+        <img src="https://img.shields.io/badge/Nuxt-%3E%3D%203.0.0%20%7C%7C%20%5E4.0.0-brightgreen.svg">
     </a>
         <img src="https://img.shields.io/badge/Vue-%3E%203.0.0-brightgreen.svg">
     </a>
@@ -19,7 +19,7 @@
     </a>
 </p>
 
-<p align=center>A powerful SVG sprite module for Nuxt 3 that automatically generates SVG sprites from your assets and provides an easy-to-use component for displaying icons.</p>
+<p align=center>A powerful SVG sprite module for Nuxt 3 & Nuxt 4 that automatically generates SVG sprites from your assets and provides an easy-to-use component for displaying icons.</p>
 
 <p align="center">
 <a target="_blank" href="https://www.npmjs.com/package/nuxt-svg-sprite-icon">
@@ -176,6 +176,28 @@ export default defineNuxtConfig({
   }
 })
 ```
+
+### Nuxt 4 Configuration
+
+For Nuxt 4 projects, you can use the new directory structure:
+
+```js
+export default defineNuxtConfig({
+  future: {
+    compatibilityVersion: 4,
+  },
+  modules: ['nuxt-svg-sprite-icon'],
+  svgSprite: {
+    // Use app directory for Nuxt 4
+    input: './app/assets/svg',
+    output: './app/assets/sprite/gen',
+    defaultSprite: 'icons',
+    elementClass: 'svg-icon',
+  }
+})
+```
+
+The module automatically detects Nuxt 4 compatibility mode and adjusts paths accordingly.
 
 ### Configuration Options
 

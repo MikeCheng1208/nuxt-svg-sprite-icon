@@ -7,7 +7,7 @@
 <p align=center>
     <a target="_blank" href="https://vuejs.org/" title="vue">
     <a target="_blank" href="http://nodejs.org/download/" title="Nuxt version">
-        <img src="https://img.shields.io/badge/Nuxt-%3E%3D%203.0.0-brightgreen.svg">
+        <img src="https://img.shields.io/badge/Nuxt-%3E%3D%203.0.0%20%7C%7C%20%5E4.0.0-brightgreen.svg">
     </a>
         <img src="https://img.shields.io/badge/Vue-%3E%203.0.0-brightgreen.svg">
     </a>
@@ -20,7 +20,7 @@
 </p>
 
 <p align=center>
-一個強大的 Nuxt 3 SVG 模組，可自動從您的資源檔案生成 SVG sprite，並提供易於使用的組件來顯示圖示。
+一個強大的 Nuxt 3 & 4 SVG 模組，可自動從您的資源檔案生成 SVG sprite，並提供易於使用的組件來顯示圖示。
 </p>
 
 <p align="center">

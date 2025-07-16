@@ -15,7 +15,7 @@ export default defineNuxtModule<ModuleOptions>({
     name: 'nuxt-svg-sprite-icon',
     configKey: 'svgSprite',
     compatibility: {
-      nuxt: '^3.0.0'
+      nuxt: '^3.0.0 || ^4.0.0'
     }
   },
   defaults: {
@@ -127,16 +127,27 @@ function resolveInputPath(input: string, nuxt: any): string {
   // 處理 ~ 路徑，優先檢查 app 目錄（Nuxt 4）
   if (input.startsWith('~/')) {
     const relativePath = input.replace('~/', '')
-    // 先嘗試 app 目錄（Nuxt 4）
-    const appPath = join(nuxt.options.rootDir, 'app', relativePath)
-    // 再嘗試 srcDir（Nuxt 3）
-    const srcPath = join(nuxt.options.srcDir, relativePath)
     
-    // 在構建時無法檢查檔案存在，所以根據 Nuxt 版本決定
-    return nuxt.options.future?.compatibilityVersion === 4 ? appPath : srcPath
+    // 檢查是否為 Nuxt 4 或使用 compatibilityVersion 4
+    const isNuxt4 = nuxt.options.future?.compatibilityVersion === 4 || 
+                   (nuxt.options.srcDir && nuxt.options.srcDir.includes('/app'))
+    
+    if (isNuxt4) {
+      return join(nuxt.options.rootDir, 'app', relativePath)
+    } else {
+      return join(nuxt.options.srcDir, relativePath)
+    }
   }
   
-  return join(nuxt.options.srcDir, input)
+  // 對於非 ~ 路徑，根據 Nuxt 版本決定基礎目錄
+  const isNuxt4 = nuxt.options.future?.compatibilityVersion === 4 || 
+                 (nuxt.options.srcDir && nuxt.options.srcDir.includes('/app'))
+  
+  if (isNuxt4) {
+    return join(nuxt.options.rootDir, 'app', input)
+  } else {
+    return join(nuxt.options.srcDir, input)
+  }
 }
 
 /**
@@ -156,16 +167,27 @@ function resolveOutputPath(output: string, nuxt: any): string {
   // 處理 ~ 路徑，優先檢查 app 目錄（Nuxt 4）
   if (output.startsWith('~/')) {
     const relativePath = output.replace('~/', '')
-    // 先嘗試 app 目錄（Nuxt 4）
-    const appPath = join(nuxt.options.rootDir, 'app', relativePath)
-    // 再嘗試 srcDir（Nuxt 3）
-    const srcPath = join(nuxt.options.srcDir, relativePath)
     
-    // 在構建時無法檢查檔案存在，所以根據 Nuxt 版本決定
-    return nuxt.options.future?.compatibilityVersion === 4 ? appPath : srcPath
+    // 檢查是否為 Nuxt 4 或使用 compatibilityVersion 4
+    const isNuxt4 = nuxt.options.future?.compatibilityVersion === 4 || 
+                   (nuxt.options.srcDir && nuxt.options.srcDir.includes('/app'))
+    
+    if (isNuxt4) {
+      return join(nuxt.options.rootDir, 'app', relativePath)
+    } else {
+      return join(nuxt.options.srcDir, relativePath)
+    }
   }
   
-  return join(nuxt.options.srcDir, output)
+  // 對於非 ~ 路徑，根據 Nuxt 版本決定基礎目錄
+  const isNuxt4 = nuxt.options.future?.compatibilityVersion === 4 || 
+                 (nuxt.options.srcDir && nuxt.options.srcDir.includes('/app'))
+  
+  if (isNuxt4) {
+    return join(nuxt.options.rootDir, 'app', output)
+  } else {
+    return join(nuxt.options.srcDir, output)
+  }
 }
 
 /**

@@ -7,7 +7,7 @@
 <p align=center>
     <a target="_blank" href="https://vuejs.org/" title="vue">
     <a target="_blank" href="http://nodejs.org/download/" title="Nuxt version">
-        <img src="https://img.shields.io/badge/Nuxt-%3E%3D%203.0.0-brightgreen.svg">
+        <img src="https://img.shields.io/badge/Nuxt-%3E%3D%203.0.0%20%7C%7C%20%5E4.0.0-brightgreen.svg">
     </a>
         <img src="https://img.shields.io/badge/Vue-%3E%203.0.0-brightgreen.svg">
     </a>
@@ -19,7 +19,7 @@
     </a>
 </p>
 
-<p align=center>Nuxt 3 用の強力な SVG スプライトモジュール。アセットから SVG スプライトを自動生成し、アイコンを表示するための使いやすいコンポーネントを提供します。</p>
+<p align=center>Nuxt 3 & 4 用の強力な SVG スプライトモジュール。アセットから SVG スプライトを自動生成し、アイコンを表示するための使いやすいコンポーネントを提供します。</p>
 
 <p align="center">
 <a target="_blank" href="https://www.npmjs.com/package/nuxt-svg-sprite-icon">

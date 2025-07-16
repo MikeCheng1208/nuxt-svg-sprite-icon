@@ -1,6 +1,6 @@
 {
   "name": "nuxt-svg-sprite-icon",
-  "version": "1.0.47",
+  "version": "2.0.0",
   "scripts": {
     "prepack": "nuxt-module-build build",
     "dev": "nuxi dev playground",
@@ -13,7 +13,7 @@
     "test:types": "vue-tsc --noEmit && cd playground && vue-tsc --noEmit",
     "push": "git push origin main && npm publish"
   },
-  "description": "A powerful SVG sprite module for Nuxt 3 that automatically generates SVG sprites from your assets and provides an easy-to-use component for displaying icons.",
+  "description": "A powerful SVG sprite module for Nuxt 3 & 4 that automatically generates SVG sprites from your assets and provides an easy-to-use component for displaying icons.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/MikeCheng1208/nuxt-svg-sprite-icon.git"
@@ -44,23 +44,21 @@
   "files": [
     "dist"
   ],
-  "dependencies": {
-    "@nuxt/kit": "^3.17.3"
-  },
   "devDependencies": {
     "@nuxt/devtools": "^2.4.1",
+    "@nuxt/kit": "^4.0.0",
     "@nuxt/module-builder": "^1.0.1",
-    "@nuxt/schema": "^3.17.3",
+    "@nuxt/schema": "^4.0.0",
     "@nuxt/test-utils": "^3.19.0",
     "@types/node": "latest",
     "@unocss/nuxt": "^66.1.2",
     "changelogen": "^0.6.1",
+    "chokidar": "^3.5.0",
     "eslint": "^9.27.0",
-    "nuxt": "^3.17.3",
+    "nuxt": "^4.0.0",
     "typescript": "~5.8.3",
     "vitest": "^3.1.4",
-    "vue-tsc": "^2.2.10",
-    "chokidar": "^3.5.0"
+    "vue-tsc": "^2.2.10"
   },
   "keywords": [
     "icon",
@@ -69,6 +67,7 @@
     "svg",
     "Nuxt",
     "Nuxt3",
+    "Nuxt4",
     "svg-sprite",
     "nuxt-svg-sprite"
   ]
