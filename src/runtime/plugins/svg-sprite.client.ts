@@ -22,12 +22,9 @@ const state: PluginState = {
 export default defineNuxtPlugin({
   name: 'svg-sprite-icon-client',
   setup() {
-    // 服務端渲染時直接返回
-    if (process.server) {
-      return {};
-    }
-
-    // 初始化 SVG sprite 系統
+    if (process.server) return {};
+    
+    // init SVG sprite 
     const initializeSvgSprite = async (): Promise<void> => {
       if (state.isInitialized) {
         return;
@@ -39,7 +36,7 @@ export default defineNuxtPlugin({
       } catch (error) {
         console.error('Failed to initialize SVG sprite system:', error);
         
-        // 重試機制
+        // retry 機制
         if (state.retryCount < MAX_RETRY_COUNT) {
           state.retryCount++;
           setTimeout(() => {
@@ -49,26 +46,26 @@ export default defineNuxtPlugin({
       }
     };
 
-    // 添加 SVG sprite 容器到 DOM（優化版本）
+    // 添加 SVG sprite 到 DOM
     const addSpriteContainer = async (): Promise<void> => {
-      // 檢查前置條件
+      
       if (state.isSpriteContainerAdded || !document?.body) {
         return;
       }
       
-      // 驗證 sprite 內容
+      
       if (!spriteContent || Object.keys(spriteContent).length === 0) {
         console.warn('[nuxt-svg-sprite-icon] No SVG content found');
         return;
       }
       
-      // 移除現有容器（如果存在）
+      
       removeExistingContainer();
       
-      // 創建並配置容器
+      
       const container = createSpriteContainer();
       
-      // 批次添加所有 sprite 內容
+      
       const spriteElements = Object.entries(spriteContent)
         .filter(([, content]) => content && typeof content === 'string' && content.trim())
         .map(([, content]) => content);
@@ -78,19 +75,19 @@ export default defineNuxtPlugin({
         return;
       }
       
-      // 使用 DocumentFragment 優化 DOM 操作
+      
       const fragment = document.createDocumentFragment();
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = spriteElements.join('');
       
-      // 將所有子節點移動到 fragment
+      
       while (tempDiv.firstChild) {
         fragment.appendChild(tempDiv.firstChild);
       }
       
       container.appendChild(fragment);
       
-      // 一次性插入到 DOM
+      
       document.body.insertBefore(container, document.body.firstChild);
       state.isSpriteContainerAdded = true;
       
@@ -99,7 +96,7 @@ export default defineNuxtPlugin({
       }
     };
 
-    // 移除現有容器
+    
     const removeExistingContainer = (): void => {
       const existingContainer = document.getElementById(CONTAINER_ID);
       if (existingContainer) {
@@ -107,7 +104,7 @@ export default defineNuxtPlugin({
       }
     };
 
-    // 創建 sprite 容器
+    // 創建 sprite
     const createSpriteContainer = (): HTMLDivElement => {
       const container = document.createElement('div');
       container.id = CONTAINER_ID;
@@ -117,7 +114,7 @@ export default defineNuxtPlugin({
       return container;
     };
 
-    // 重新加載 sprite 系統
+    
     const reloadSprites = async (): Promise<void> => {
       state.isSpriteContainerAdded = false;
       state.isInitialized = false;
@@ -125,7 +122,7 @@ export default defineNuxtPlugin({
       await initializeSvgSprite();
     };
 
-    // 獲取 sprite 統計信息
+    
     const getSpriteStats = () => {
       return {
         spriteCount: Object.keys(spriteContent).length,
@@ -135,11 +132,10 @@ export default defineNuxtPlugin({
       };
     };
 
-    // 根據文檔狀態初始化
+    
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initializeSvgSprite, { once: true });
     } else {
-      // 使用 requestIdleCallback 或 setTimeout 延遲執行以避免阻塞
       if (typeof requestIdleCallback !== 'undefined') {
         requestIdleCallback(initializeSvgSprite);
       } else {
@@ -147,7 +143,7 @@ export default defineNuxtPlugin({
       }
     }
 
-    // 提供插件 API
+    
     return {
       provide: {
         svgSprite: {

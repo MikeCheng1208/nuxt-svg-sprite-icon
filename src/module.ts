@@ -33,7 +33,7 @@ export default defineNuxtModule<ModuleOptions>({
     const inputPath = resolveInputPath(options.input!, nuxt)
     const outputPath = resolveOutputPath(options.output!, nuxt)
     
-    // 調試日誌
+    
     logger.info(`Input path resolved to: ${inputPath}`)
     logger.info(`Output path resolved to: ${outputPath}`)
     logger.info(`Nuxt compatibility version: ${nuxt.options.future?.compatibilityVersion || 'default'}`)
@@ -43,7 +43,7 @@ export default defineNuxtModule<ModuleOptions>({
     
     let spriteContent: Record<string, string> = {}
     
-    // 生成 sprites 的函數
+    // 生成 sprites 
     const generateSpritesWithErrorHandling = async () => {
       try {
         logger.info(`Attempting to generate sprites from: ${inputPath}`)
@@ -67,7 +67,7 @@ export default defineNuxtModule<ModuleOptions>({
       }
     }
     
-    // 初始生成（開發模式、構建時或生產環境）
+    // init（dev mode、build or prod mode）
     await generateSpritesWithErrorHandling()
     
     // 創建優化的 SVG 模板
@@ -92,7 +92,7 @@ export default defineNuxtModule<ModuleOptions>({
       chunkName: 'components/svg-icon'
     })
     
-    // 註冊客戶端插件
+    // 註冊 client 插件
     addPlugin({
       src: resolve('./runtime/plugins/svg-sprite.client'),
       mode: 'client'
@@ -124,7 +124,7 @@ function resolveInputPath(input: string, nuxt: any): string {
     return nuxt.options.alias[input]
   }
   
-  // 處理 ~ 路徑，優先檢查 app 目錄（Nuxt 4）
+  // 處理 ~ 路徑，優先檢查 Nuxt 4 app
   if (input.startsWith('~/')) {
     const relativePath = input.replace('~/', '')
     
@@ -139,7 +139,7 @@ function resolveInputPath(input: string, nuxt: any): string {
     }
   }
   
-  // 對於非 ~ 路徑，根據 Nuxt 版本決定基礎目錄
+  // 對於非 ~ 路徑，根據 Nuxt 版本決定 srcDir
   const isNuxt4 = nuxt.options.future?.compatibilityVersion === 4 || 
                  (nuxt.options.srcDir && nuxt.options.srcDir.includes('/app'))
   
@@ -154,17 +154,18 @@ function resolveInputPath(input: string, nuxt: any): string {
  * 解析輸出路徑
  */
 function resolveOutputPath(output: string, nuxt: any): string {
-  // 處理絕對路徑
+ 
+  
   if (output.startsWith('./') || output.startsWith('../')) {
     return join(nuxt.options.rootDir, output)
   }
   
-  // 處理別名路徑
+  
   if (nuxt.options.alias[output]) {
     return nuxt.options.alias[output]
   }
   
-  // 處理 ~ 路徑，優先檢查 app 目錄（Nuxt 4）
+  // 處理 ~ 路徑，優先檢查 Nuxt 4 app
   if (output.startsWith('~/')) {
     const relativePath = output.replace('~/', '')
     
@@ -179,7 +180,7 @@ function resolveOutputPath(output: string, nuxt: any): string {
     }
   }
   
-  // 對於非 ~ 路徑，根據 Nuxt 版本決定基礎目錄
+  // 對於非 ~ 路徑，根據 Nuxt 版本決定 srcDir
   const isNuxt4 = nuxt.options.future?.compatibilityVersion === 4 || 
                  (nuxt.options.srcDir && nuxt.options.srcDir.includes('/app'))
   
@@ -208,7 +209,7 @@ function validateOptions(options: ModuleOptions, logger: any): void {
 }
 
 /**
- * 生成 sprite 模組內容（優化版本）
+ * 生成 sprite 模組內容
  */
 function generateSpriteModule(spriteContent: Record<string, string>, options: ModuleOptions): string {
   const contentEntries = Object.entries(spriteContent)
@@ -217,7 +218,7 @@ function generateSpriteModule(spriteContent: Record<string, string>, options: Mo
     return `export const spriteContent = {};\nexport const options = ${JSON.stringify(options, null, 2)};`
   }
   
-  // 使用陣列 join 而非字串拼接以提升效能
+  // 使用陣列 join 拼接
   const contentLines = contentEntries.map(([key, content]) => 
     `  "${escapeKey(key)}": \`${escapeSvgContent(content)}\``
   )

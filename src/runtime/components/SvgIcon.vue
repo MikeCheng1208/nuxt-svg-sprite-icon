@@ -8,7 +8,7 @@ type Props = {
 
 const props = defineProps<Props>();
 
-// 幫助 Nuxt DevTools 找到元件位置
+// 支援 Nuxt DevTools 找到元件位置
 const __file = "src/runtime/components/SvgIcon.vue";
 
 const defaultOptions = {

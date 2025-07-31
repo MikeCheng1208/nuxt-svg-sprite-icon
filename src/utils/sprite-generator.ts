@@ -23,15 +23,15 @@ export async function generateSprites(
   options: ModuleOptions
 ): Promise<SpriteGenerationResult> {
   try {
-    // 驗證輸入參數
+    
     if (!inputPath || !outputPath) {
       throw new Error('Input and output paths are required');
     }
 
-    // 確保輸出目錄存在
+    
     await ensureDirectory(outputPath);
     
-    // 獲取所有 SVG 文件資訊
+    
     const svgFiles = await getSvgFiles(inputPath);
     
     if (svgFiles.length === 0) {
@@ -39,7 +39,7 @@ export async function generateSprites(
       return { spriteMap: {}, spriteContent: {} };
     }
 
-    // 將文件按 sprite 分組
+    // 將文件按 sprite
     const fileGroups = groupFilesBySprite(svgFiles, inputPath, options);
     
     // 批次處理生成 sprites
@@ -92,7 +92,7 @@ async function collectSvgFilesRecursive(dir: string, files: string[]): Promise<v
   try {
     const entries = await readdir(dir, { withFileTypes: true });
     
-    // 分離文件和目錄以優化處理順序
+    
     const directories: string[] = [];
     
     for (const entry of entries) {
@@ -105,7 +105,7 @@ async function collectSvgFilesRecursive(dir: string, files: string[]): Promise<v
       }
     }
     
-    // 並行處理子目錄
+    
     await Promise.all(
       directories.map(subDir => collectSvgFilesRecursive(subDir, files))
     );
@@ -194,14 +194,14 @@ async function processSingleSprite(
     const symbols: string[] = [];
     const symbolElements: string[] = [];
     
-    // 批次處理文件以避免記憶體問題
+    
     for (let i = 0; i < files.length; i += BATCH_SIZE) {
       const batch = files.slice(i, i + BATCH_SIZE);
       
       const batchPromises = batch.map(async (fileInfo) => {
         try {
           const svgContent = await readFile(fileInfo.filePath, 'utf-8');
-          // 使用增強的處理方法來解決兼容性問題
+          
           const processedSvg = options.optimize ? processSvg(svgContent) : svgContent;
           const symbolElement = svgToSymbol(processedSvg, fileInfo.symbolName);
           
