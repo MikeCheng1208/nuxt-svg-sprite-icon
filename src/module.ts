@@ -89,7 +89,8 @@ export default defineNuxtModule<ModuleOptions>({
       name: 'SvgIcon',
       filePath: resolve('./runtime/components/SvgIcon.vue'),
       export: 'default',
-      chunkName: 'components/svg-icon'
+      chunkName: 'components/svg-icon',
+      global: true
     })
     
     // 註冊 client 插件
