@@ -5,50 +5,47 @@ import type { ModuleOptions, SpriteGenerationResult } from '../types'
 import { processSvg, svgToSymbol } from './svg-processor'
 
 // 批次處理大小，避免記憶體問題
-const BATCH_SIZE = 50;
+const BATCH_SIZE = 50
 
 type SvgFileInfo = {
-  readonly filePath: string;
-  readonly relativePath: string;
-  readonly spriteName: string;
-  readonly symbolName: string;
+  readonly filePath: string
+  readonly relativePath: string
+  readonly spriteName: string
+  readonly symbolName: string
 }
 
 /**
  * 生成 SVG sprites
  */
 export async function generateSprites(
-  inputPath: string, 
-  outputPath: string, 
-  options: ModuleOptions
+  inputPath: string,
+  outputPath: string,
+  options: ModuleOptions,
 ): Promise<SpriteGenerationResult> {
   try {
-    
     if (!inputPath || !outputPath) {
-      throw new Error('Input and output paths are required');
+      throw new Error('Input and output paths are required')
     }
 
-    
-    await ensureDirectory(outputPath);
-    
-    
-    const svgFiles = await getSvgFiles(inputPath);
-    
+    await ensureDirectory(outputPath)
+
+    const svgFiles = await getSvgFiles(inputPath)
+
     if (svgFiles.length === 0) {
-      console.warn(`No SVG files found in ${inputPath}`);
-      return { spriteMap: {}, spriteContent: {} };
+      console.warn(`No SVG files found in ${inputPath}`)
+      return { spriteMap: {}, spriteContent: {} }
     }
 
     // 將文件按 sprite
-    const fileGroups = groupFilesBySprite(svgFiles, inputPath, options);
-    
+    const fileGroups = groupFilesBySprite(svgFiles, inputPath, options)
+
     // 批次處理生成 sprites
-    const results = await processSpriteGroups(fileGroups, outputPath, options);
-    
-    return results;
+    const results = await processSpriteGroups(fileGroups, outputPath, options)
+
+    return results
   } catch (error) {
-    console.error('Error generating sprites:', error);
-    throw error;
+    console.error('Error generating sprites:', error)
+    throw error
   }
 }
 
@@ -57,7 +54,7 @@ export async function generateSprites(
  */
 async function ensureDirectory(dirPath: string): Promise<void> {
   if (!existsSync(dirPath)) {
-    await mkdir(dirPath, { recursive: true });
+    await mkdir(dirPath, { recursive: true })
   }
 }
 
@@ -65,23 +62,23 @@ async function ensureDirectory(dirPath: string): Promise<void> {
  * 遞迴獲取所有 SVG 文件（優化版本）
  */
 async function getSvgFiles(dir: string): Promise<string[]> {
-  const files: string[] = [];
-  
+  const files: string[] = []
+
   if (!existsSync(dir)) {
-    return files;
+    return files
   }
 
   try {
-    const dirStat = await stat(dir);
+    const dirStat = await stat(dir)
     if (!dirStat.isDirectory()) {
-      return files;
+      return files
     }
 
-    await collectSvgFilesRecursive(dir, files);
-    return files;
+    await collectSvgFilesRecursive(dir, files)
+    return files
   } catch (error) {
-    console.warn(`Error reading directory ${dir}:`, error);
-    return files;
+    console.warn(`Error reading directory ${dir}:`, error)
+    return files
   }
 }
 
@@ -90,27 +87,25 @@ async function getSvgFiles(dir: string): Promise<string[]> {
  */
 async function collectSvgFilesRecursive(dir: string, files: string[]): Promise<void> {
   try {
-    const entries = await readdir(dir, { withFileTypes: true });
-    
-    
-    const directories: string[] = [];
-    
+    const entries = await readdir(dir, { withFileTypes: true })
+
+    const directories: string[] = []
+
     for (const entry of entries) {
-      const fullPath = join(dir, entry.name);
-      
+      const fullPath = join(dir, entry.name)
+
       if (entry.isDirectory()) {
-        directories.push(fullPath);
+        directories.push(fullPath)
       } else if (entry.isFile() && entry.name.endsWith('.svg')) {
-        files.push(fullPath);
+        files.push(fullPath)
       }
     }
-    
-    
+
     await Promise.all(
-      directories.map(subDir => collectSvgFilesRecursive(subDir, files))
-    );
+      directories.map(subDir => collectSvgFilesRecursive(subDir, files)),
+    )
   } catch (error) {
-    console.warn(`Error reading directory ${dir}:`, error);
+    console.warn(`Error reading directory ${dir}:`, error)
   }
 }
 
@@ -118,142 +113,156 @@ async function collectSvgFilesRecursive(dir: string, files: string[]): Promise<v
  * 將文件按 sprite 分組
  */
 function groupFilesBySprite(
-  svgFiles: string[], 
-  inputPath: string, 
-  options: ModuleOptions
+  svgFiles: string[],
+  inputPath: string,
+  options: ModuleOptions,
 ): Map<string, SvgFileInfo[]> {
-  const groups = new Map<string, SvgFileInfo[]>();
-  
+  const groups = new Map<string, SvgFileInfo[]>()
+
   for (const filePath of svgFiles) {
-    const relativePath = relative(inputPath, filePath);
-    const dir = dirname(relativePath);
-    const name = basename(relativePath, '.svg');
-    
+    const relativePath = relative(inputPath, filePath)
+    const dir = dirname(relativePath)
+    const name = basename(relativePath, '.svg')
+
     // 生成 sprite 名稱和 symbol 名稱
-    const spriteName = dir === '.' ? options.defaultSprite! : dir.replace(/[/\\]/g, '-');
-    const symbolName = dir === '.' ? name : `${dir.replace(/[/\\]/g, '-')}-${name}`;
-    
+    const spriteName = dir === '.' ? options.defaultSprite! : dir.replace(/[/\\]/g, '-')
+    const symbolName = dir === '.' ? name : `${dir.replace(/[/\\]/g, '-')}-${name}`
+
     const fileInfo: SvgFileInfo = {
       filePath,
       relativePath,
       spriteName,
-      symbolName
-    };
-    
-    if (!groups.has(spriteName)) {
-      groups.set(spriteName, []);
+      symbolName,
     }
-    groups.get(spriteName)!.push(fileInfo);
+
+    if (!groups.has(spriteName)) {
+      groups.set(spriteName, [])
+    }
+    groups.get(spriteName)!.push(fileInfo)
   }
-  
-  return groups;
+
+  return groups
 }
 
 /**
  * 處理 sprite 群組
  */
 async function processSpriteGroups(
-  fileGroups: Map<string, SvgFileInfo[]>, 
-  outputPath: string, 
-  options: ModuleOptions
+  fileGroups: Map<string, SvgFileInfo[]>,
+  outputPath: string,
+  options: ModuleOptions,
 ): Promise<SpriteGenerationResult> {
-  const spriteMap: Record<string, { path: string; symbols: string[] }> = {};
-  const spriteContent: Record<string, string> = {};
-  
+  const spriteMap: Record<string, { path: string; symbols: string[] }> = {}
+  const spriteContent: Record<string, string> = {}
+
   // 並行處理所有 sprite 群組
   const spritePromises = Array.from(fileGroups.entries()).map(
-    ([spriteName, files]) => processSingleSprite(spriteName, files, outputPath, options)
-  );
-  
-  const results = await Promise.all(spritePromises);
-  
+    ([spriteName, files]) => processSingleSprite(spriteName, files, outputPath, options),
+  )
+
+  const results = await Promise.all(spritePromises)
+
   // 合併結果
   for (const result of results) {
     if (result) {
       spriteMap[result.spriteName] = {
         path: result.spritePath,
-        symbols: result.symbols
-      };
-      spriteContent[result.spriteName] = result.content;
+        symbols: result.symbols,
+      }
+      spriteContent[result.spriteName] = result.content
     }
   }
-  
-  return { spriteMap, spriteContent };
+
+  return { spriteMap, spriteContent }
 }
 
 /**
  * 處理單個 sprite
  */
 async function processSingleSprite(
-  spriteName: string, 
-  files: SvgFileInfo[], 
-  outputPath: string, 
-  options: ModuleOptions
+  spriteName: string,
+  files: SvgFileInfo[],
+  outputPath: string,
+  options: ModuleOptions,
 ): Promise<{ spriteName: string; spritePath: string; symbols: string[]; content: string } | null> {
   try {
-    const symbols: string[] = [];
-    const symbolElements: string[] = [];
-    
-    
+    const symbols: string[] = []
+    const symbolElements: string[] = []
+
     for (let i = 0; i < files.length; i += BATCH_SIZE) {
-      const batch = files.slice(i, i + BATCH_SIZE);
-      
+      const batch = files.slice(i, i + BATCH_SIZE)
+
       const batchPromises = batch.map(async (fileInfo) => {
         try {
-          const svgContent = await readFile(fileInfo.filePath, 'utf-8');
-          
-          const processedSvg = options.optimize ? processSvg(svgContent) : svgContent;
-          const symbolElement = svgToSymbol(processedSvg, fileInfo.symbolName);
-          
+          const svgContent = await readFile(fileInfo.filePath, 'utf-8')
+
+          const processedSvg = options.optimize ? processSvg(svgContent) : svgContent
+          const symbolElement = svgToSymbol(processedSvg, fileInfo.symbolName)
+
           return {
             symbolName: fileInfo.symbolName,
-            symbolElement
-          };
+            symbolElement,
+          }
         } catch (error) {
-          console.warn(`Error processing SVG file ${fileInfo.filePath}:`, error);
-          return null;
+          console.warn(`Error processing SVG file ${fileInfo.filePath}:`, error)
+          return null
         }
-      });
-      
-      const batchResults = await Promise.all(batchPromises);
-      
+      })
+
+      const batchResults = await Promise.all(batchPromises)
+
       for (const result of batchResults) {
         if (result) {
-          symbols.push(result.symbolName);
-          symbolElements.push(result.symbolElement);
+          symbols.push(result.symbolName)
+          symbolElements.push(result.symbolElement)
         }
       }
     }
-    
+
     if (symbolElements.length === 0) {
-      console.warn(`No valid SVG files found for sprite: ${spriteName}`);
-      return null;
+      console.warn(`No valid SVG files found for sprite: ${spriteName}`)
+      return null
     }
-    
+
     // 生成 sprite 內容
-    const spriteContent = generateSpriteContent(symbolElements);
-    const spritePath = join(outputPath, `${spriteName}.svg`);
-    
+    const spriteContent = generateSpriteContent(symbolElements)
+    const spritePath = join(outputPath, `${spriteName}.svg`)
+
     // 寫入文件
-    await writeFile(spritePath, spriteContent, 'utf-8');
-    
+    await writeFile(spritePath, spriteContent, 'utf-8')
+
     return {
       spriteName,
       spritePath,
       symbols,
-      content: spriteContent
-    };
+      content: spriteContent,
+    }
   } catch (error) {
-    console.error(`Error processing sprite ${spriteName}:`, error);
-    return null;
+    console.error(`Error processing sprite ${spriteName}:`, error)
+    return null
   }
+}
+
+/**
+ * 偵測是否包含 paint server 相關特性（gradient/pattern/filter/mask/clipPath、url(#...) 等）。
+ * 若 sprite 或 symbol 使用 paint server，避免將定義所在容器設為 display:none，以提升跨瀏覽器相容性（尤其 Safari）。
+ */
+function hasPaintServerFeatures(svgContent: string): boolean {
+  if (!svgContent) return false
+  return /url\(#|<(linearGradient|radialGradient|pattern|filter|mask|clipPath)\b/i.test(svgContent)
 }
 
 /**
  * 生成 sprite 內容
  */
 function generateSpriteContent(symbolElements: string[]): string {
-  return `<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  const needsPaintServerCompat = symbolElements.some(hasPaintServerFeatures)
+  const svgAttrs = needsPaintServerCompat
+    ? 'xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden;"'
+    : 'xmlns="http://www.w3.org/2000/svg" style="display: none;"'
+
+  return `<svg ${svgAttrs}>
 ${symbolElements.join('\n')}
-</svg>`;
+</svg>`
 }
+

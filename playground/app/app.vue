@@ -35,7 +35,7 @@
 
       <!-- 複雜的圖標測試 -->
       <div class="border p-4">
-        <h2 class="text-lg mb-2">複雜的圖標（變成正方形的問題）：</h2>
+        <h2 class="text-lg mb-2">複雜的圖標：</h2>
         <div class="w-100px h-100px bg-gray-100">
           <SvgIcon name="test_complex" class="w-full h-full" />
         </div>
@@ -46,6 +46,15 @@
         <h2 class="text-lg mb-2">子目錄圖標：</h2>
         <div class="w-100px h-100px bg-black">
           <SvgIcon name="user/icon-fly" class="fill-blue-500 w-full h-full" />
+        </div>
+      </div>
+
+      <!-- Gradient/Defs 相容性測試 -->
+      <div class="border p-4">
+        <h2 class="text-lg mb-2">Gradient/Defs 相容性測試：</h2>
+        <div class="w-100px h-100px bg-gray-100">
+          <!-- 注意：不要加任何 fill/text 類別，避免覆蓋 path 內的 fill="url(#...)" -->
+          <SvgIcon name="gradient-star" class="w-full h-full" />
         </div>
       </div>
     </div>

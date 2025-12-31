@@ -110,7 +110,8 @@ This module has enhanced SVG processing capabilities that handle various types o
 ### ✅ Supported SVG Features
 
 - **Inline styles and CSS classes** - Automatically converts `<style>` tags and CSS classes to inline styles
-- **Complex defs and gradients** - Preserves functional definitions like clipPaths, gradients, and patterns
+- **Gradients / Paint servers (`url(#...)`)** - Supports `linearGradient` / `radialGradient` (including `fill="url(#...)"` and `stroke="url(#...)"`)
+- **Complex defs** - Preserves functional definitions like `clipPath`, `mask`, `pattern`, and `filter`
 - **ID conflict resolution** - Automatically prefixes IDs to prevent conflicts between different sprites
 - **Various SVG formats** - Works with SVGs from different design tools (Figma, Sketch, Illustrator, etc.)
 
@@ -146,6 +147,19 @@ This module has enhanced SVG processing capabilities that handle various types o
             <rect width="24" height="24"/>
         </clipPath>
     </defs>
+</svg>
+```
+
+**SVG with gradients / paint servers (`url(#...)`):**
+```xml
+<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="paint0_linear" x1="20" y1="0" x2="0" y2="20" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFCF45"/>
+      <stop offset="1" stop-color="#FFB92A"/>
+    </linearGradient>
+  </defs>
+  <path d="M10 1L12.5 7H19L14 11L16 18L10 14L4 18L6 11L1 7H7.5Z" fill="url(#paint0_linear)"/>
 </svg>
 ```
 

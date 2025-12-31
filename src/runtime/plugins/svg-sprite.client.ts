@@ -11,6 +11,7 @@ type PluginState = {
 const CONTAINER_ID = 'nuxt-svg-sprite-container';
 const MAX_RETRY_COUNT = 3;
 const RETRY_DELAY = 100;
+const PAINT_SERVER_FEATURE_REGEX = /url\(#|<(linearGradient|radialGradient|pattern|filter|mask|clipPath)\b/i
 
 // 使用響應式狀態管理
 const state: PluginState = {
@@ -18,6 +19,14 @@ const state: PluginState = {
   isInitialized: false,
   retryCount: 0
 };
+
+function needsPaintServerCompat(spriteContent: Record<string, string>): boolean {
+  try {
+    return Object.values(spriteContent).some((content) => PAINT_SERVER_FEATURE_REGEX.test(content))
+  } catch {
+    return false
+  }
+}
 
 export default defineNuxtPlugin({
   name: 'svg-sprite-icon-client',
@@ -108,9 +117,13 @@ export default defineNuxtPlugin({
     const createSpriteContainer = (): HTMLDivElement => {
       const container = document.createElement('div');
       container.id = CONTAINER_ID;
-      container.style.cssText = 'display: none; position: absolute; width: 0; height: 0; overflow: hidden;';
+      const compatMode = needsPaintServerCompat(spriteContent)
+      container.style.cssText = compatMode
+        ? 'position: absolute; width: 0; height: 0; overflow: hidden;'
+        : 'display: none; position: absolute; width: 0; height: 0; overflow: hidden;';
       container.setAttribute('aria-hidden', 'true');
       container.setAttribute('data-nuxt-svg-sprite', 'true');
+      container.setAttribute('data-nuxt-svg-sprite-compat', compatMode ? 'paint-server' : 'default');
       return container;
     };
 
