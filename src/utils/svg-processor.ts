@@ -205,9 +205,19 @@ export function svgToSymbol(svgContent: string, id: string): string {
     throw new Error('SVG content and ID are required');
   }
   const viewBox = extractViewBox(svgContent);
+  const fill = extractRootFill(svgContent);
   const processedContent = processCompatibleSvg(svgContent, id);
   const content = processedContent.replace(SVG_TAG_REGEX, '').trim();
-  return `<symbol id="${escapeHtml(id)}" viewBox="${viewBox}">${content}</symbol>`;
+  const fillAttr = fill !== null ? ` fill="${fill}"` : '';
+  return `<symbol id="${escapeHtml(id)}" viewBox="${viewBox}"${fillAttr}>${content}</symbol>`;
+}
+
+/**
+ * 提取 <svg> 根元素上的 fill 屬性（繼承給子元素用，轉換成 symbol 時需保留）
+ */
+function extractRootFill(svgContent: string): string | null {
+  const match = svgContent.match(/<svg[^>]*\sfill="([^"]*)"/);
+  return match ? match[1] : null;
 }
 
 /**

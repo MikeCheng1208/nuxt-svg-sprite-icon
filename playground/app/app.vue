@@ -57,6 +57,29 @@
           <SvgIcon name="gradient-star" class="w-full h-full" />
         </div>
       </div>
+
+      <!-- stroke 圖標測試（fill="none" 修復驗證） -->
+      <div class="border p-4">
+        <h2 class="text-lg mb-2">Stroke 圖標測試（fill="none" 修復）：</h2>
+        <p class="text-sm text-gray-500 mb-2">應顯示為線條描邊風格，不應出現黑色實心色塊</p>
+        <div class="flex gap-4 items-center">
+          <div>
+            <p class="text-xs mb-1">SvgIcon eye</p>
+            <SvgIcon name="eye" class="w-8 h-8" />
+          </div>
+          <div>
+            <p class="text-xs mb-1">SvgIcon eye-close</p>
+            <SvgIcon name="eye-close" class="w-8 h-8" />
+          </div>
+          <div>
+            <p class="text-xs mb-1">原始 inline SVG（對照組）</p>
+            <svg width="32" height="32" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 3.49951C3 3.49951 1 8 1 8C1 8 3 12.4995 8 12.4995C13 12.4995 15 8 15 8C15 8 13 3.49951 8 3.49951Z" stroke="#060A26" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 6.25C8.9665 6.25 9.75 7.0335 9.75 8C9.75 8.9665 8.9665 9.75 8 9.75C7.0335 9.75 6.25 8.9665 6.25 8C6.25 7.0335 7.0335 6.25 8 6.25Z" stroke="#060A26" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
