@@ -37,7 +37,7 @@ const href = computed(() => `#${symbolName.value}`);
 
 <template>
   <svg :class="svgClass" aria-hidden="true">
-    <use :href="href" />
+    <use :href.attr="href" />
   </svg>
 </template>
 
